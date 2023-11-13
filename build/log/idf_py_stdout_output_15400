@@ -1,0 +1,348 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\Espressif\frameworks\esp-idf-v5.1.1\examples\get-started\tp\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.1_py3.11_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.1.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6810 bytes. 0x7f0 bytes (7%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+FAILED: esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj 
+ccache C:\Espressif\tools\xtensa-esp32-elf\esp-12.2.0_20230208\xtensa-esp32-elf\bin\xtensa-esp32-elf-gcc.exe -DESP_PLATFORM -DIDF_VER=\"v5.1.1-dirty\" -DMBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\" -DSOC_MMU_PAGE_SIZE=CONFIG_MMU_PAGE_SIZE -DUNITY_INCLUDE_CONFIG_H -D_GNU_SOURCE -D_POSIX_READER_WRITER_LOCKS -IC:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/build/config -IC:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/newlib/platform_include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/freertos/FreeRTOS-Kernel/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/freertos/FreeRTOS-Kernel/portable/xtensa/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/freertos/esp_additions/include/freertos -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/freertos/esp_additions/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/freertos/esp_additions/arch/xtensa/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_hw_support/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_hw_support/include/soc -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_hw_support/include/soc/esp32 -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_hw_support/port/esp32/. -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_hw_support/port/esp32/private_include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/heap/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/log/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/soc/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/soc/esp32 -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/soc/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/hal/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/hal/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/hal/platform_port/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_rom/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_rom/include/esp32 -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_rom/esp32 -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_common/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_system/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_system/port/soc -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_system/port/include/private -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/xtensa/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/xtensa/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/include/apps -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/include/apps/sntp -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/lwip/src/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/port/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/port/freertos/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/port/esp32xx/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/lwip/port/esp32xx/include/arch -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_ringbuf/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/efuse/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/efuse/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/deprecated -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/analog_comparator/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/dac/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/gpio/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/gptimer/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2s/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/ledc/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/mcpwm/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/parlio/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/pcnt/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/rmt/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/sdio_slave/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/sdmmc/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/sigma_delta/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/spi/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/temperature_sensor/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/touch_sensor/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/twai/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/uart/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/usb_serial_jtag/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/touch_sensor/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_pm/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/mbedtls/port/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/mbedtls/mbedtls/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/mbedtls/mbedtls/library -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/mbedtls/esp_crt_bundle/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_app_format/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/bootloader_support/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/bootloader_support/bootloader_flash/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_partition/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/app_update/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_mm/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/spi_flash/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/pthread/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_timer/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/app_trace/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_event/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/nvs_flash/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_phy/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_phy/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/vfs/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_netif/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/wpa_supplicant/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/wpa_supplicant/port/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/wpa_supplicant/esp_supplicant/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_coex/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_wifi/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_wifi/wifi_apps/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/unity/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/unity/unity/src -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/cmock/CMock/src -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/console -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/http_parser -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp-tls -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp-tls/esp-tls-crypto -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_adc/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_adc/interface -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_adc/esp32/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_adc/deprecated/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_eth/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_gdbstub/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_hid/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/tcp_transport/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_http_client/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_http_server/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_https_ota/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_psram/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_lcd/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_lcd/interface -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/protobuf-c/protobuf-c -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/protocomm/include/common -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/protocomm/include/security -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/protocomm/include/transports -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_local_ctrl/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/espcoredump/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/espcoredump/include/port/xtensa -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/wear_levelling/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/sdmmc/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/fatfs/diskio -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/fatfs/vfs -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/fatfs/src -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/idf_test/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/idf_test/include/esp32 -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/ieee802154/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/json/cJSON -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/mqtt/esp-mqtt/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/perfmon/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/spiffs/include -IC:/Espressif/frameworks/esp-idf-v5.1.1/components/wifi_provisioning/include -mlongcalls -Wno-frame-address  -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-enum-conversion -gdwarf-4 -ggdb -Og -fmacro-prefix-map=C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp=. -fmacro-prefix-map=C:/Espressif/frameworks/esp-idf-v5.1.1=/IDF -fstrict-volatile-bitfields -fno-jump-tables -fno-tree-switch-conversion -DconfigENABLE_FREERTOS_DEBUG_OCDAWARE=1 -std=gnu17 -Wno-old-style-declaration -MD -MT esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj -MF esp-idf\main\CMakeFiles\__idf_main.dir\main.c.obj.d -o esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj -c C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c
+In file included from C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:23:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:5:5: error: unknown type name 'bool'
+    5 |     bool init;
+      |     ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:6:5: error: unknown type name 'i2c_port_t'
+    6 |     i2c_port_t i2c_port;
+      |     ^~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:8:5: error: unknown type name 'portBASE_TYPE'
+    8 |     portBASE_TYPE timeout;
+      |     ^~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:13:5: error: unknown type name 'bool'
+   13 |     bool init;                                          ///< True if struct has been initialised, otherwise false
+      |     ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'i2c_lcd1602_malloc':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:131:9: error: implicit declaration of function 'ESP_LOGD' [-Werror=implicit-function-declaration]
+  131 |         ESP_LOGD(TAG, "malloc i2c_lcd1602_info_t %p", i2c_lcd1602_info);
+      |         ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:135:9: error: implicit declaration of function 'ESP_LOGE' [-Werror=implicit-function-declaration]
+  135 |         ESP_LOGE(TAG, "malloc i2c_lcd1602_info_t failed");
+      |         ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:140:1: error: unknown type name 'esp_err_t'
+  140 | esp_err_t smbus_init(smbus_info_t * smbus_info, i2c_port_t i2c_port, i2c_address_t address)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:140:49: error: unknown type name 'i2c_port_t'; did you mean 'in_port_t'?
+  140 | esp_err_t smbus_init(smbus_info_t * smbus_info, i2c_port_t i2c_port, i2c_address_t address)
+      |                                                 ^~~~~~~~~~
+      |                                                 in_port_t
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:157:8: error: unknown type name 'esp_err_t'
+  157 | static esp_err_t _check_i2c_error(esp_err_t err)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:157:35: error: unknown type name 'esp_err_t'
+  157 | static esp_err_t _check_i2c_error(esp_err_t err)
+      |                                   ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:184:8: error: unknown type name 'esp_err_t'
+  184 | static esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'mpu9250_register_read':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:186:12: error: implicit declaration of function 'i2c_master_write_read_device' [-Werror=implicit-function-declaration]
+  186 |     return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:186:127: error: 'portTICK_PERIOD_MS' undeclared (first use in this function)
+  186 |     return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+      |                                                                                                                               ^~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:186:127: note: each undeclared identifier is reported only once for each function it appears in
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:189:8: error: unknown type name 'bool'
+  189 | static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info)
+      |        ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function '_is_init':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:191:5: error: unknown type name 'bool'
+  191 |     bool ok = false;
+      |     ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:1:1: note: 'bool' is defined in header '<stdbool.h>'; did you forget to '#include <stdbool.h>'?
+  +++ |+#include <stdbool.h>
+    1 | typedef uint16_t i2c_address_t;
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:191:15: error: 'false' undeclared (first use in this function)
+  191 |     bool ok = false;
+      |               ^~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:191:15: note: 'false' is defined in header '<stdbool.h>'; did you forget to '#include <stdbool.h>'?
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:196:18: error: 'true' undeclared (first use in this function)
+  196 |             ok = true;
+      |                  ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:196:18: note: 'true' is defined in header '<stdbool.h>'; did you forget to '#include <stdbool.h>'?
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:213:1: error: unknown type name 'esp_err_t'
+  213 | esp_err_t smbus_send_byte(const smbus_info_t * smbus_info, uint8_t data)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'smbus_send_byte':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:216:5: error: unknown type name 'esp_err_t'
+  216 |     esp_err_t err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:216:21: error: 'ESP_FAIL' undeclared (first use in this function)
+  216 |     esp_err_t err = ESP_FAIL;
+      |                     ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:217:18: warning: passing argument 1 of '_is_init' from incompatible pointer type [-Wincompatible-pointer-types]
+  217 |     if (_is_init(smbus_info))
+      |                  ^~~~~~~~~~
+      |                  |
+      |                  const smbus_info_t *
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:189:49: note: expected 'const i2c_lcd1602_info_t *' but argument is of type 'const smbus_info_t *'
+  189 | static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info)
+      |                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:219:9: error: unknown type name 'i2c_cmd_handle_t'
+  219 |         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+      |         ^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:219:32: error: implicit declaration of function 'i2c_cmd_link_create' [-Werror=implicit-function-declaration]
+  219 |         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+      |                                ^~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:220:9: error: implicit declaration of function 'i2c_master_start' [-Werror=implicit-function-declaration]
+  220 |         i2c_master_start(cmd);
+      |         ^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:221:9: error: implicit declaration of function 'i2c_master_write_byte' [-Werror=implicit-function-declaration]
+  221 |         i2c_master_write_byte(cmd, smbus_info->address << 1 | WRITE_BIT, ACK_CHECK);
+      |         ^~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:117:24: error: 'I2C_MASTER_WRITE' undeclared (first use in this function); did you mean 'I2C_MASTER_NUM'?
+  117 | #define WRITE_BIT      I2C_MASTER_WRITE
+      |                        ^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:221:63: note: in expansion of macro 'WRITE_BIT'
+  221 |         i2c_master_write_byte(cmd, smbus_info->address << 1 | WRITE_BIT, ACK_CHECK);
+      |                                                               ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:119:24: error: 'true' undeclared (first use in this function)
+  119 | #define ACK_CHECK      true
+      |                        ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:221:74: note: in expansion of macro 'ACK_CHECK'
+  221 |         i2c_master_write_byte(cmd, smbus_info->address << 1 | WRITE_BIT, ACK_CHECK);
+      |                                                                          ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:119:24: note: 'true' is defined in header '<stdbool.h>'; did you forget to '#include <stdbool.h>'?
+  119 | #define ACK_CHECK      true
+      |                        ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:221:74: note: in expansion of macro 'ACK_CHECK'
+  221 |         i2c_master_write_byte(cmd, smbus_info->address << 1 | WRITE_BIT, ACK_CHECK);
+      |                                                                          ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:223:9: error: implicit declaration of function 'i2c_master_stop' [-Werror=implicit-function-declaration]
+  223 |         i2c_master_stop(cmd);
+      |         ^~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:224:15: error: implicit declaration of function '_check_i2c_error' [-Werror=implicit-function-declaration]
+  224 |         err = _check_i2c_error(i2c_master_cmd_begin(smbus_info->i2c_port, cmd, smbus_info->timeout));
+      |               ^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:224:32: error: implicit declaration of function 'i2c_master_cmd_begin' [-Werror=implicit-function-declaration]
+  224 |         err = _check_i2c_error(i2c_master_cmd_begin(smbus_info->i2c_port, cmd, smbus_info->timeout));
+      |                                ^~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:225:9: error: implicit declaration of function 'i2c_cmd_link_delete' [-Werror=implicit-function-declaration]
+  225 |         i2c_cmd_link_delete(cmd);
+      |         ^~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:233:8: error: unknown type name 'esp_err_t'
+  233 | static esp_err_t mpu9250_register_write_byte(uint8_t reg_addr, uint8_t data)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'mpu9250_register_write_byte':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:238:11: error: implicit declaration of function 'i2c_master_write_to_device' [-Werror=implicit-function-declaration]
+  238 |     ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:238:129: error: 'portTICK_PERIOD_MS' undeclared (first use in this function)
+  238 |     ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+      |                                                                                                                                 ^~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:245:8: error: unknown type name 'esp_err_t'
+  245 | static esp_err_t _write_to_expander(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:256:8: error: unknown type name 'esp_err_t'
+  256 | static esp_err_t _strobe_enable(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function '_strobe_enable':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:258:5: error: unknown type name 'esp_err_t'
+  258 |     esp_err_t err1 = _write_to_expander(i2c_lcd1602_info, data | FLAG_ENABLE);
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:259:5: error: implicit declaration of function 'esp_rom_delay_us' [-Werror=implicit-function-declaration]
+  259 |     esp_rom_delay_us(DELAY_ENABLE_PULSE_WIDTH);
+      |     ^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:260:5: error: unknown type name 'esp_err_t'
+  260 |     esp_err_t err2 = _write_to_expander(i2c_lcd1602_info, data & ~FLAG_ENABLE);
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:266:8: error: unknown type name 'esp_err_t'
+  266 | static esp_err_t _write_top_nibble(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function '_write_top_nibble':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:269:5: error: unknown type name 'esp_err_t'
+  269 |     esp_err_t err1 = _write_to_expander(i2c_lcd1602_info, data);
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:270:5: error: unknown type name 'esp_err_t'
+  270 |     esp_err_t err2 = _strobe_enable(i2c_lcd1602_info, data);
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:275:8: error: unknown type name 'esp_err_t'
+  275 | static esp_err_t _write(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t value, uint8_t register_select_flag)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function '_write':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:278:5: error: unknown type name 'esp_err_t'
+  278 |     esp_err_t err1 = _write_top_nibble(i2c_lcd1602_info, (value & 0xf0) | register_select_flag);
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:279:5: error: unknown type name 'esp_err_t'
+  279 |     esp_err_t err2 = _write_top_nibble(i2c_lcd1602_info, ((value & 0x0f) << 4) | register_select_flag);
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:284:8: error: unknown type name 'esp_err_t'
+  284 | static esp_err_t _write_command(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t command)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:291:8: error: unknown type name 'esp_err_t'
+  291 | static esp_err_t _write_data(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
+      |        ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:297:1: error: unknown type name 'esp_err_t'
+  297 | esp_err_t i2c_lcd1602_write_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t chr)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'i2c_lcd1602_write_char':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:299:5: error: unknown type name 'esp_err_t'
+  299 |     esp_err_t err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:299:21: error: 'ESP_FAIL' undeclared (first use in this function)
+  299 |     esp_err_t err = ESP_FAIL;
+      |                     ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:307:1: error: unknown type name 'esp_err_t'
+  307 | esp_err_t lcd_write(const i2c_lcd1602_info_t * i2c_lcd1602_info, const char * string)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'lcd_write':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:309:5: error: unknown type name 'esp_err_t'
+  309 |     esp_err_t err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:309:21: error: 'ESP_FAIL' undeclared (first use in this function)
+  309 |     esp_err_t err = ESP_FAIL;
+      |                     ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:313:15: error: 'ESP_OK' undeclared (first use in this function)
+  313 |         err = ESP_OK;
+      |               ^~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:322:1: error: unknown type name 'esp_err_t'
+  322 | esp_err_t lcd_home(const i2c_lcd1602_info_t * i2c_lcd1602_info)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'lcd_home':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:324:5: error: unknown type name 'esp_err_t'
+  324 |     esp_err_t err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:324:21: error: 'ESP_FAIL' undeclared (first use in this function)
+  324 |     esp_err_t err = ESP_FAIL;
+      |                     ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:328:20: error: 'ESP_OK' undeclared (first use in this function)
+  328 |         if (err == ESP_OK)
+      |                    ^~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:336:1: error: unknown type name 'esp_err_t'
+  336 | esp_err_t lcd_clear(const i2c_lcd1602_info_t * i2c_lcd1602_info)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'lcd_clear':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:338:5: error: unknown type name 'esp_err_t'
+  338 |     esp_err_t err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:338:21: error: 'ESP_FAIL' undeclared (first use in this function)
+  338 |     esp_err_t err = ESP_FAIL;
+      |                     ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:342:20: error: 'ESP_OK' undeclared (first use in this function)
+  342 |         if (err == ESP_OK)
+      |                    ^~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:350:1: error: unknown type name 'esp_err_t'
+  350 | esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'i2c_lcd1602_reset':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:352:5: error: unknown type name 'esp_err_t'
+  352 |     esp_err_t first_err = ESP_OK;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:352:27: error: 'ESP_OK' undeclared (first use in this function)
+  352 |     esp_err_t first_err = ESP_OK;
+      |                           ^~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:353:5: error: unknown type name 'esp_err_t'
+  353 |     esp_err_t last_err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:353:26: error: 'ESP_FAIL' undeclared (first use in this function)
+  353 |     esp_err_t last_err = ESP_FAIL;
+      |                          ^~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:442:1: error: unknown type name 'esp_err_t'
+  442 | esp_err_t i2c_lcd1602_init(i2c_lcd1602_info_t * i2c_lcd1602_info, smbus_info_t * smbus_info,
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:443:28: error: unknown type name 'bool'
+  443 |                            bool backlight, uint8_t num_rows, uint8_t num_columns, uint8_t num_visible_columns)
+      |                            ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:443:28: note: 'bool' is defined in header '<stdbool.h>'; did you forget to '#include <stdbool.h>'?
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:475:1: error: unknown type name 'esp_err_t'
+  475 | esp_err_t lcd_move_cursor(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t col, uint8_t row)
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: In function 'lcd_move_cursor':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:477:5: error: unknown type name 'esp_err_t'
+  477 |     esp_err_t err = ESP_FAIL;
+      |     ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:477:21: error: 'ESP_FAIL' undeclared (first use in this function)
+  477 |     esp_err_t err = ESP_FAIL;
+      |                     ^~~~~~~~
+In file included from C:/Espressif/frameworks/esp-idf-v5.1.1/components/log/include/esp_log.h:14,
+                 from C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:24:
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_rom/include/esp_rom_sys.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/esp_rom/include/esp_rom_sys.h:49:6: warning: conflicting types for 'esp_rom_delay_us'; have 'void(uint32_t)' {aka 'void(long unsigned int)'}
+   49 | void esp_rom_delay_us(uint32_t us);
+      |      ^~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:259:5: note: previous implicit declaration of 'esp_rom_delay_us' with type 'void(uint32_t)' {aka 'void(long unsigned int)'}
+  259 |     esp_rom_delay_us(DELAY_ENABLE_PULSE_WIDTH);
+      |     ^~~~~~~~~~~~~~~~
+In file included from C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:25:
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:193:11: error: conflicting types for 'i2c_master_write_to_device'; have 'esp_err_t(i2c_port_t,  uint8_t,  const uint8_t *, size_t,  TickType_t)' {aka 'int(i2c_port_t,  unsigned char,  const unsigned char *, unsigned int,  long unsigned int)'}
+  193 | esp_err_t i2c_master_write_to_device(i2c_port_t i2c_num, uint8_t device_address,
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:195:38: note: an argument type that has a default promotion cannot match an empty parameter name list declaration
+  195 |                                      TickType_t ticks_to_wait);
+      |                                      ^~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:238:11: note: previous implicit declaration of 'i2c_master_write_to_device' with type 'int()'
+  238 |     ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:241:11: error: conflicting types for 'i2c_master_write_read_device'; have 'esp_err_t(i2c_port_t,  uint8_t,  const uint8_t *, size_t,  uint8_t *, size_t,  TickType_t)' {aka 'int(i2c_port_t,  unsigned char,  const unsigned char *, unsigned int,  unsigned char *, unsigned int,  long unsigned int)'}
+  241 | esp_err_t i2c_master_write_read_device(i2c_port_t i2c_num, uint8_t device_address,
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:244:40: note: an argument type that has a default promotion cannot match an empty parameter name list declaration
+  244 |                                        TickType_t ticks_to_wait);
+      |                                        ^~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:186:12: note: previous implicit declaration of 'i2c_master_write_read_device' with type 'int()'
+  186 |     return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:275:18: error: conflicting types for 'i2c_cmd_link_create'; have 'void *(void)'
+  275 | i2c_cmd_handle_t i2c_cmd_link_create(void);
+      |                  ^~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:219:32: note: previous implicit declaration of 'i2c_cmd_link_create' with type 'int()'
+  219 |         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+      |                                ^~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:291:6: warning: conflicting types for 'i2c_cmd_link_delete'; have 'void(void *)'
+  291 | void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle);
+      |      ^~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:225:9: note: previous implicit declaration of 'i2c_cmd_link_delete' with type 'void(void *)'
+  225 |         i2c_cmd_link_delete(cmd);
+      |         ^~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:324:11: error: conflicting types for 'i2c_master_write_byte'; have 'esp_err_t(void *, uint8_t,  _Bool)' {aka 'int(void *, unsigned char,  _Bool)'}
+  324 | esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle, uint8_t data, bool ack_en);
+      |           ^~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/components/driver/i2c/include/driver/i2c.h:324:1: note: an argument type that has a default promotion cannot match an empty parameter name list declaration
+  324 | esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle, uint8_t data, bool ack_en);
+      | ^~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:221:9: note: previous implicit declaration of 'i2c_master_write_byte' with type 'int()'
+  221 |         i2c_master_write_byte(cmd, smbus_info->address << 1 | WRITE_BIT, ACK_CHECK);
+      |         ^~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c: In function 'app_main':
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:103:5: error: implicit declaration of function 'smbus_init'; did you mean '_is_init'? [-Werror=implicit-function-declaration]
+  103 |     smbus_init(smbus_info, 0, MPU9250_SENSOR_ADDR);
+      |     ^~~~~~~~~~
+      |     _is_init
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:110:5: error: implicit declaration of function 'i2c_lcd1602_init'; did you mean 'i2c_lcd1602_reset'? [-Werror=implicit-function-declaration]
+  110 |     i2c_lcd1602_init(i2c_lcd1602_info, smbus_info, true, 2, 16, 16);
+      |     ^~~~~~~~~~~~~~~~
+      |     i2c_lcd1602_reset
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:109:13: warning: unused variable 'data' [-Wunused-variable]
+  109 |     uint8_t data[2];
+      |             ^~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/main.c:87:9: warning: unused variable 'i2c_master_port' [-Wunused-variable]
+   87 |     int i2c_master_port = 0;
+      |         ^~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h: At top level:
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:233:18: warning: 'mpu9250_register_write_byte' defined but not used [-Wunused-function]
+  233 | static esp_err_t mpu9250_register_write_byte(uint8_t reg_addr, uint8_t data)
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Espressif/frameworks/esp-idf-v5.1.1/examples/get-started/tp/main/initi2c.h:184:18: warning: 'mpu9250_register_read' defined but not used [-Wunused-function]
+  184 | static esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
+      |                  ^~~~~~~~~~~~~~~~~~~~~
+cc1.exe: some warnings being treated as errors
+ninja: build stopped: subcommand failed.
