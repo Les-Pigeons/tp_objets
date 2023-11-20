@@ -27,7 +27,44 @@ typedef struct
     uint8_t entry_mode_flags;                           ///< Currently active entry mode flags
 } i2c_lcd1602_info_t;
 
+/**
+ * @brief Enum of valid indexes for definitions of user-defined characters.
+ */
+typedef enum
+{
+    I2C_LCD1602_INDEX_CUSTOM_0 = 0,                     ///< Index of first user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_1,                         ///< Index of second user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_2,                         ///< Index of third user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_3,                         ///< Index of fourth user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_4,                         ///< Index of fifth user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_5,                         ///< Index of sixth user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_6,                         ///< Index of seventh user-defined custom symbol
+    I2C_LCD1602_INDEX_CUSTOM_7,                         ///< Index of eighth user-defined custom symbol
+} i2c_lcd1602_custom_index_t;
 
+#define I2C_LCD1602_CHARACTER_CUSTOM_0     0b00001000   ///< User-defined custom symbol in index 0
+#define I2C_LCD1602_CHARACTER_CUSTOM_1     0b00001001   ///< User-defined custom symbol in index 1
+#define I2C_LCD1602_CHARACTER_CUSTOM_2     0b00001010   ///< User-defined custom symbol in index 2
+#define I2C_LCD1602_CHARACTER_CUSTOM_3     0b00001011   ///< User-defined custom symbol in index 3
+#define I2C_LCD1602_CHARACTER_CUSTOM_4     0b00001100   ///< User-defined custom symbol in index 4
+#define I2C_LCD1602_CHARACTER_CUSTOM_5     0b00001101   ///< User-defined custom symbol in index 5
+#define I2C_LCD1602_CHARACTER_CUSTOM_6     0b00001110   ///< User-defined custom symbol in index 6
+#define I2C_LCD1602_CHARACTER_CUSTOM_7     0b00001111   ///< User-defined custom symbol in index 7
+
+#define I2C_LCD1602_CHARACTER_ALPHA        0b11100000   ///< Lower-case alpha symbol
+#define I2C_LCD1602_CHARACTER_BETA         0b11100010   ///< Lower-case beta symbol
+#define I2C_LCD1602_CHARACTER_THETA        0b11110010   ///< Lower-case theta symbol
+#define I2C_LCD1602_CHARACTER_PI           0b11110111   ///< Lower-case pi symbol
+#define I2C_LCD1602_CHARACTER_OMEGA        0b11110100   ///< Upper-case omega symbol
+#define I2C_LCD1602_CHARACTER_SIGMA        0b11110110   ///< Upper-case sigma symbol
+#define I2C_LCD1602_CHARACTER_INFINITY     0b11110011   ///< Infinity symbol
+#define I2C_LCD1602_CHARACTER_DEGREE       0b11011111   ///< Degree symbol
+#define I2C_LCD1602_CHARACTER_ARROW_RIGHT  0b01111110   ///< Arrow pointing right symbol
+#define I2C_LCD1602_CHARACTER_ARROW_LEFT   0b01111111   ///< Arrow pointing left symbol
+#define I2C_LCD1602_CHARACTER_SQUARE       0b11011011   ///< Square outline symbol
+#define I2C_LCD1602_CHARACTER_DOT          0b10100101   ///< Centred dot symbol
+#define I2C_LCD1602_CHARACTER_DIVIDE       0b11111101   ///< Division sign symbol
+#define I2C_LCD1602_CHARACTER_BLOCK        0b11111111   ///< 5x8 filled block
 
 #define TAG "i2c-lcd1602"
 
@@ -213,9 +250,6 @@ static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     return ok;
 }
 
-
-
-
 esp_err_t smbus_send_byte(const smbus_info_t * smbus_info, uint8_t data)
 {
     // Protocol: [S | ADDR | Wr | As | DATA | As | P]
@@ -232,21 +266,6 @@ esp_err_t smbus_send_byte(const smbus_info_t * smbus_info, uint8_t data)
     }
     return err;
 }
-
-/**
- * @brief Write a byte to a MPU9250 sensor register
- */
-static esp_err_t mpu9250_register_write_byte(uint8_t reg_addr, uint8_t data)
-{
-    int ret;
-    uint8_t write_buf[2] = {reg_addr, data};
-
-    ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-
-    return ret;
-}
-
-
 
 static esp_err_t _write_to_expander(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
 {
@@ -299,6 +318,8 @@ static esp_err_t _write_data(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_
     ESP_LOGD(TAG, "_write_data 0x%02x", data);
     return _write(i2c_lcd1602_info, data, FLAG_RS_DATA);
 }
+
+
 
 esp_err_t i2c_lcd1602_write_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t chr)
 {
@@ -474,6 +495,21 @@ esp_err_t i2c_lcd1602_init(i2c_lcd1602_info_t * i2c_lcd1602_info, smbus_info_t *
     {
         ESP_LOGE(TAG, "i2c_lcd1602_info is NULL");
         err = ESP_FAIL;
+    }
+    return err;
+}
+
+esp_err_t lcd_define_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, i2c_lcd1602_custom_index_t index, const uint8_t pixelmap[])
+{
+    esp_err_t err = ESP_FAIL;
+    if (_is_init(i2c_lcd1602_info))
+    {
+        index &= 0x07;  // only the first 8 indexes can be used for custom characters
+        err = _write_command(i2c_lcd1602_info, COMMAND_SET_CGRAM_ADDR | (index << 3));
+        for (int i = 0; err == ESP_OK && i < 8; ++i)
+        {
+            err = _write_data(i2c_lcd1602_info, pixelmap[i]);
+        }
     }
     return err;
 }

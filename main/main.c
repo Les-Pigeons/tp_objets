@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "initi2c.h"
+#include "initBLE.h"
 #include "esp_log.h"
 #include "driver/i2c.h"
 
@@ -103,6 +104,7 @@ void app_main(void)
     };
 
     setupIO();
+    ble_init();
 
     i2c_lcd1602_info_t* i2c_lcd1602_info = i2c_lcd1602_malloc();
     global_info = i2c_lcd1602_info;
@@ -119,6 +121,37 @@ void app_main(void)
     lcd_home(i2c_lcd1602_info);
     lcd_clear(i2c_lcd1602_info);
     lcd_write(i2c_lcd1602_info, "Hello test3");
+    img_line();
+    uint8_t charset[] = {
+            0x0E,
+            0x0A,
+            0x0E,
+            0x0A,
+            0x0A,
+            0x0A,
+            0x1F,
+            0x1B
+                        };
+    lcd_define_char(i2c_lcd1602_info, 1, charset);
 
-    xTaskCreate(buttonTest, "buttonTest", 2048, NULL, 10, NULL);
+    uint8_t charset2[] = {
+            0x0A,
+            0x15,
+            0x15,
+            0x11,
+            0x11,
+            0x0A,
+            0x04,
+            0x00
+    };
+
+    lcd_define_char(i2c_lcd1602_info, 2, charset2);
+
+
+    lcd_move_cursor(i2c_lcd1602_info, 1, 1);
+    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_2);
+
+
+    // xTaskCreate(buttonTest, "buttonTest", 2048, NULL, 10, NULL);
 }
