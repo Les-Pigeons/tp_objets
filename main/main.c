@@ -22,6 +22,7 @@
 
 #include "initi2c.h"
 #include "initBLE.h"
+#include "scanBLE.h"
 #include "esp_log.h"
 #include "driver/i2c.h"
 
@@ -105,6 +106,7 @@ void app_main(void)
 
     setupIO();
     ble_init();
+    init_SCAN();
 
     i2c_lcd1602_info_t* i2c_lcd1602_info = i2c_lcd1602_malloc();
     global_info = i2c_lcd1602_info;
