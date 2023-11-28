@@ -7,7 +7,7 @@
 
 #endif //A23_OBJET_TP1_CARACTERS_H
 
-static byte charProgressFull[] = { // =⬛
+static uint8_t  charProgressFull[] = { // =⬛
         0x1F,
         0x00,
         0x1F,
@@ -18,7 +18,7 @@ static byte charProgressFull[] = { // =⬛
         0x1F
 };
 
-static byte charProgressEmpty[] = { // =
+static uint8_t charProgressEmpty[] = { // =
         0x1F,
         0x00,
         0x00,
@@ -29,7 +29,7 @@ static byte charProgressEmpty[] = { // =
         0x1F
 };
 
-static byte charFlag[] = { // 🚩
+static uint8_t charFlag[] = { // 🚩
         0x1F,
         0x11,
         0x11,
@@ -40,7 +40,7 @@ static byte charFlag[] = { // 🚩
         0x11
 };
 
-static byte charStateRepose1[] = { // REPOSE 1
+static uint8_t charStateRepose1[] = { // REPOSE 1
         0x00,
         0x00,
         0x00,
@@ -51,7 +51,7 @@ static byte charStateRepose1[] = { // REPOSE 1
         0x0A
 };
 
-static byte charStateRepose2[] = { // REPOSE 2
+static uint8_t charStateRepose2[] = { // REPOSE 2
         0x00,
         0x00,
         0x00,
@@ -62,7 +62,7 @@ static byte charStateRepose2[] = { // REPOSE 2
         0x0A
 };
 
-static byte charStateHyperactive1[] = { // HYPERACTIF 1
+static uint8_t charStateHyperactive1[] = { // HYPERACTIF 1
         0x00,
         0x00,
         0x00,
@@ -73,7 +73,7 @@ static byte charStateHyperactive1[] = { // HYPERACTIF 1
         0x0A
 };
 
-static byte charStateHyperactive2[] = { // HYPERACTIF 2
+static uint8_t charStateHyperactive2[] = { // HYPERACTIF 2
         0x00,
         0x00,
         0x0E,
@@ -84,7 +84,7 @@ static byte charStateHyperactive2[] = { // HYPERACTIF 2
         0x00
 };
 
-static byte charStateWornOut1[] = { // EPUISE 1
+static uint8_t charStateWornOut1[] = { // EPUISE 1
         0x00,
         0x0C,
         0x0C,
@@ -95,7 +95,7 @@ static byte charStateWornOut1[] = { // EPUISE 1
         0x1F
 };
 
-static byte charStateWornOut2[] = { // EPUISE 2
+static uint8_t charStateWornOut2[] = { // EPUISE 2
         0x00,
         0x06,
         0x06,
@@ -106,7 +106,7 @@ static byte charStateWornOut2[] = { // EPUISE 2
         0x1F
 };
 
-static byte charStateTired1[] = { // FATIGUE 1
+static uint8_t charStateTired1[] = { // FATIGUE 1
         0x00,
         0x02,
         0x00,
@@ -117,7 +117,7 @@ static byte charStateTired1[] = { // FATIGUE 1
         0x0A
 };
 
-static byte charStateTired2[] = { // FATIGUE 2
+static uint8_t charStateTired2[] = { // FATIGUE 2
         0x08,
         0x00,
         0x02,
@@ -128,7 +128,7 @@ static byte charStateTired2[] = { // FATIGUE 2
         0x0A
 };
 
-static byte charStateAlone1[] = { // SOLITAIRE 1
+static uint8_t charStateAlone1[] = { // SOLITAIRE 1
         0x1F,
         0x0A,
         0x0E,
@@ -139,7 +139,7 @@ static byte charStateAlone1[] = { // SOLITAIRE 1
         0x00
 };
 
-static byte charStateAlone2[] = { // SOLITAIRE 2
+static uint8_t charStateAlone2[] = { // SOLITAIRE 2
         0x1F,
         0x0A,
         0x0E,

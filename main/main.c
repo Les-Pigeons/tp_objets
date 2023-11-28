@@ -25,10 +25,11 @@
 #include <stdbool.h>
 
 #include "initi2c.h"
-//#include "initBLE.h"
-//#include "scanBLE.h"
+#include "initBLE.h"
+#include "scanBLE.h"
 #include "esp_log.h"
 #include "driver/i2c.h"
+#include "characters.h"
 
 #define RED_BUTTON 35
 #define BLUE_BUTTON 32
@@ -40,8 +41,10 @@ const int BASE_ENERGY_INCREASE = 2;
 const int BASE_ENERGY_DECREASE = 1;
 const int MAX_ENERGY = 1000;
 const int MAX_QUALITY = 5;
-const int FRAMEWORK_CREATION_EXP = 50;
+const int FRAMEWORK_CREATION_EXP = 500;
 const int EXPERIENCE_QUALITY_MULTIPLIER = 10;
+
+static const i2c_lcd1602_info_t *i2c_lcd1602_info;
 
 // Queue
 #define MAX_QUEUE_SIZE 20
@@ -59,6 +62,7 @@ typedef struct {
 
 typedef struct Game {
     int avatarState;
+    int activeTab;
 
     // Level
     int level;
@@ -80,6 +84,7 @@ typedef struct Game {
     int social; // Number of social interactions
     int lastSocial; // Last time social interaction was detected
     double socialMultiplier; // Multiplier for the social interaction
+    bool isCrying; // Is crying
 
     // Energy
     int energy;
@@ -100,6 +105,7 @@ Game initializeGame() {
 
     // Set default values
     newGame.avatarState = 0;  // Set to the default avatar state
+    newGame.activeTab = 1;  // Set to the default tab
 
     // Initialize other members with default values
     newGame.level = 1;
@@ -118,6 +124,7 @@ Game initializeGame() {
     newGame.social = 0;
     newGame.lastSocial = currentTime;
     newGame.socialMultiplier = 1.0;
+    newGame.isCrying = false;
 
     newGame.energy = 1000;  // Set an initial energy value
     newGame.energyMultiplier = 1;
@@ -127,49 +134,6 @@ Game initializeGame() {
     return newGame;
 }
 
-
-int enqueue(Queue *queue, int value);
-
-void initQueue(Queue *queue);
-
-int get_framework_average(Queue *queue);
-
-void initGame(Game *game);
-
-void get_avatar_state(Game *game);
-
-void set_proximity(Game *game, bool isProximityActive);
-
-void initGame(Game *game) {
-    game->avatarState = REPOSE;
-
-    game->level = 0;
-    game->experience = 0;
-    game->stateExperienceMultiplier = 1;
-
-    game->framework = 0;
-    game->frameworkQualityMultiplier = 1;
-    game->frameworkSpeedMultiplier = 1;
-    game->activeFrameworkProgress = 0;
-    game->lastFrameworkLevel = -1;
-
-    time_t currentTime;
-    time(&currentTime);
-
-    game->lastProximity = currentTime;
-    game->isProximityActive = false;
-
-    game->social = 0;
-    game->lastSocial = currentTime;
-    game->socialMultiplier = 1.5;
-
-    game->energy = 1000;
-    game->energyMultiplier = 1;
-    game->energyIncrease = 0;
-    game->lastEnergyIncrease = currentTime;
-}
-
-// constructor
 void initQueue(Queue *queue) {
     queue->last = -1;
 
@@ -178,22 +142,35 @@ void initQueue(Queue *queue) {
     }
 }
 
+void initializeLCD() {
+    int i2c_master_port = 0;
+    i2c_config_t conf = {
+            .mode = 1,
+            .sda_io_num = I2C_MASTER_SDA_IO,         // select GPIO specific to your project
+            .sda_pullup_en = GPIO_PULLUP_ENABLE,
+            .scl_io_num = I2C_MASTER_SCL_IO,         // select GPIO specific to your project
+            .scl_pullup_en = GPIO_PULLUP_ENABLE,
+            .master.clk_speed = I2C_MASTER_FREQ_HZ,  // select frequency specific to your project
+            // .clk_flags = 0,          /*!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here. */
+    };
+
+    i2c_lcd1602_info = i2c_lcd1602_malloc();
+    global_info = i2c_lcd1602_info;
+
+    smbus_info_t *smbus_info = malloc(sizeof(smbus_info_t));
+    smbus_init(smbus_info, 0, MPU9250_SENSOR_ADDR);
+
+    i2c_param_config(I2C_MASTER_NUM, &conf);
+    i2c_driver_install(smbus_info->i2c_port, 1, 0, 0, ESP_INTR_FLAG_SHARED);
+    i2c_master_start(i2c_cmd_link_create());
+}
+
 // Circular queue to get an average of the last 20 framework levels
 int enqueue(Queue *queue, int value) {
     queue->last = (queue->last + 1) % MAX_QUEUE_SIZE;
     queue->array[queue->last] = value;
 
     return 1;
-}
-
-// Get the average of the last 20 framework levels
-int get_framework_average(Queue *queue) {
-    int sum = 0;
-    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        sum += queue->array[i];
-    }
-
-    return sum / MAX_QUEUE_SIZE;
 }
 
 void img_home() {
@@ -245,6 +222,37 @@ void setupIO() {
     gpio_set_direction(BLUE_BUTTON, GPIO_MODE_INPUT);
 }
 
+void set_state_custom_char(int state) {
+
+    switch (state) {
+        case REPOSE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateRepose1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateRepose2);
+            break;
+        }
+        case FATIGUE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateTired1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateTired2);
+            break;
+        }
+        case EPUISE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateWornOut1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateWornOut2);
+            break;
+        }
+        case HYPERACTIF: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateHyperactive1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateHyperactive2);
+            break;
+        }
+        case SOLITAIRE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateAlone1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateAlone2);
+            break;
+        }
+    }
+}
+
 // TODO: Add proper values
 void get_avatar_state(Game *game) {
     if (game->energy < 300) {
@@ -258,8 +266,19 @@ void get_avatar_state(Game *game) {
     } else {
         game->avatarState = REPOSE;
     }
+
+    set_state_custom_char(game->avatarState);
 }
 
+// Get the average of the last 20 framework levels
+int get_framework_average(Queue *queue) {
+    int sum = 0;
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        sum += queue->array[i];
+    }
+
+    return sum / MAX_QUEUE_SIZE;
+}
 
 void set_proximity(Game *game, bool isProximityActive) {
     game->isProximityActive = isProximityActive;
@@ -299,7 +318,7 @@ void progress_energy(Game *game) {
             game->energyMultiplier = 1;
         }
     } else {
-        if (game->energy < 1000) {
+        if (game->energy < 1000 && game->energy > 0) {
             game->energy -= BASE_ENERGY_DECREASE;
         }
     }
@@ -320,7 +339,8 @@ void drink_energy(Game *game) {
 }
 
 
-// TODO: Add wifi to sync time
+/* TODO - Romain: Add wifi to sync time. It might only be needed for the initialisation of the device. If it's the case
+    put it in main before any initialization */
 char *get_current_time() {
     time_t currentTime;
     time(&currentTime);
@@ -334,49 +354,13 @@ char *get_current_time() {
 }
 
 
-void set_state_custom_char(State *state) {
-    switch (state->avatarState) {
-        case REPOSE: {
-            lcd_define_char(i2c_lcd1602_info, 1, charStateRepose1);
-            lcd_define_char(i2c_lcd1602_info, 2, charStateRepose2);
-            break;
-        }
-        case FATIGUE: {
-            lcd_define_char(i2c_lcd1602_info, 1, charStateTired1);
-            lcd_define_char(i2c_lcd1602_info, 2, charStateTired2);
-            break;
-        }
-        case EPUISE: {
-            lcd_define_char(i2c_lcd1602_info, 1, charStateWornOut1);
-            lcd_define_char(i2c_lcd1602_info, 2, charStateWornOut2);
-            break;
-        }
-        case HYPERACTIF: {
-            lcd_define_char(i2c_lcd1602_info, 1, charStateHyperactive1);
-            lcd_define_char(i2c_lcd1602_info, 2, charStateHyperactive2);
-            break;
-        }
-        case SOLITAIRE: {
-            lcd_define_char(i2c_lcd1602_info, 1, charStateAlone1);
-            lcd_define_char(i2c_lcd1602_info, 2, charStateAlone2);
-            break;
-        }
+void set_is_crying(Game *game) {
+
+    if (game->socialMultiplier > 0.5) {
+        game->isCrying = false;
+    } else {
+        game->isCrying = true;
     }
-}
-
-
-void set_social(Game *game, int quantity) {
-    if (quantity <= 0) {
-        return;
-    }
-
-    time_t currentTime;
-    time(&currentTime);
-
-    game->lastSocial = currentTime;
-    game->social = quantity;
-
-    set_social_multiplier(game);
 }
 
 // TODO: Add proper values
@@ -403,16 +387,22 @@ void set_social_multiplier(Game *game) {
     set_is_crying(game);
 }
 
-void set_is_crying(Game *game) {
 
-
-    if (game->socialMultiplier > 0.5) {
-        game->isCrying = false;
-    } else {
-        game->isCrying = true;
+void set_social(Game *game, int quantity) {
+    if (quantity <= 0) {
+        return;
     }
+
+    time_t currentTime;
+    time(&currentTime);
+
+    game->lastSocial = currentTime;
+    game->social = quantity;
+
+    set_social_multiplier(game);
 }
 
+// Is used when the avatar feel alone and is crying
 void hardware_cry(Game *game, GameData *gameData) {
     if (game->isCrying) {
         time_t currentTime;
@@ -420,17 +410,14 @@ void hardware_cry(Game *game, GameData *gameData) {
 
         if (currentTime - gameData->lastCrying > 30) {
             gameData->lastCrying = currentTime;
-            // TODO: Add crying sounds
+            // TODO - Romain:  Add crying sounds
         }
     }
 }
 
-void hardware_display_animation(int frame) {
-    lcd_move_cursor(i2c_lcd1602_info, 1, 12);
-    if (frame == 1) {
-        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
-    } else {
-        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+void hardware_low_energy(Game *game) {
+    if (game->energy < 300) {
+        // TODO - Romain: On allume une led
     }
 }
 
@@ -474,6 +461,110 @@ void progress_framework(Game *game, Queue *frameworkQuality) {
     }
 }
 
+
+void hardware_display_animation_header(int frame, char* str1, char* str2) {
+    lcd_move_cursor(i2c_lcd1602_info, 0, 10);
+    if (frame == 1) {
+        lcd_write(i2c_lcd1602_info, str1);
+    } else {
+        lcd_write(i2c_lcd1602_info, str2);
+    }
+}
+
+void hardware_display_animation(int frame, Game *game) {
+    lcd_move_cursor(i2c_lcd1602_info, 1, 12);
+    if (frame == 1) {
+        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+    } else {
+        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+    }
+
+    if (game->isProximityActive) {
+        hardware_display_animation_header(frame, "!?!", "?!?");
+    } else if (game->avatarState == EPUISE) {
+        hardware_display_animation_header(frame, "ZzZ", "zZz");
+    }
+}
+
+
+void hardware_display_progress_bar(Game *game) {
+    int progress = round(game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
+
+    for (int i = 0; i < 10; i++) {
+        lcd_move_cursor(i2c_lcd1602_info, 1, i);
+
+        if (i < progress) {
+            _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_4);
+        } else {
+            _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_4);
+        }
+    }
+}
+
+void hardware_display_avg_quality(Queue *queue) {
+    int quality = get_framework_average(queue);
+
+    lcd_move_cursor(i2c_lcd1602_info, 0, 14);
+    lcd_write(i2c_lcd1602_info, quality);
+}
+
+// Display experience and level
+void hardware_display_tab_1(Game *game) {
+    char formattedString[11];
+
+    txt_home();
+    snprintf(formattedString, 11, "EXP%7d", game->experience);
+    lcd_write(i2c_lcd1602_info, formattedString);
+
+    txt_line();
+    snprintf(formattedString, 11, "LVL%7d", game->level);
+    lcd_write(i2c_lcd1602_info, formattedString);
+}
+
+// Display energy and time
+void hardware_display_tab_2(Game *game) {
+    char formattedString[11];
+
+    txt_home();
+    snprintf(formattedString, 11, "ENG%7d", game->energy);
+    lcd_write(i2c_lcd1602_info, formattedString);
+
+    txt_line();
+    snprintf(formattedString, 11, "ENG%7d", game->energy);
+    lcd_write(i2c_lcd1602_info, get_current_time());
+}
+
+// Display framework and progress
+void hardware_display_tab_3(Game *game) {
+    char formattedString[11];
+
+    txt_home();
+    snprintf(formattedString, 11, "FRW%7d", game->framework);
+    lcd_write(i2c_lcd1602_info, formattedString);
+
+    txt_line();
+    snprintf(formattedString, 11, "QTY%7d", game->lastFrameworkLevel);
+    hardware_display_progress_bar(game);
+}
+
+void next_tab(Game *game) {
+    game->activeTab = (game->activeTab + 1) % 3;
+}
+
+void hardware_display_tab(Game *game) {
+    switch (game->activeTab) {
+        case 0:
+            hardware_display_tab_1(game);
+            break;
+        case 1:
+            hardware_display_tab_2(game);
+            break;
+        case 2:
+            hardware_display_tab_3(game);
+            break;
+    }
+}
+
 // TODO: Add proper values
 void get_framework_multipliers(Game *game) {
     switch (game->avatarState) {
@@ -505,7 +596,6 @@ void get_framework_multipliers(Game *game) {
     }
 }
 
-
 // DEBUG
 void print_queue(Queue *queue) {
     printf("Queue: ");
@@ -535,37 +625,29 @@ void print_game(Game *game) {
     printf("int lastEnergyIncrease %d\n\n", game->lastEnergyIncrease);
 }
 
-
-// TODO: Change to display on LCD
-void update_screen(Game *game) {
-    printf("Framework Count: %d\n", game->framework);
-    printf("Framework Progress: %d / 500\n", game->activeFrameworkProgress);
-    printf("Energy value: %d\n", game->energy);
-    printf("Experience value: %d\n", game->experience);
-    printf("Level value: %d\n", game->level);
-    printf("State value: %d\n", game->avatarState);
-    printf("Framework quality: %d\n", game->lastFrameworkLevel);
-    printf("Time %s\n", get_current_time());
-}
-
 void game_loop(Game *game) {
-
 
     Queue *frameworkQuality = malloc(sizeof(Queue));
     initQueue(frameworkQuality);
 
+    int frame = 0;
+
     printf("Average: %d\n", get_framework_average(frameworkQuality));
 
     while (true) {
+        frame = (frame + 1) % 2;
+
         get_avatar_state(game);
         get_framework_multipliers(game);
 
         progress_energy(game);
         progress_framework(game, frameworkQuality);
 
-        //print_queue(frameworkQuality);
-        //print_game(game);
-        // update_screen(game);
+        hardware_display_animation(frame);
+        hardware_display_tab(game);
+        hardware_display_avg_quality(frameworkQuality);
+
+        hardware_low_energy(game);
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
@@ -576,14 +658,31 @@ void hardware_loop(Game *game) {
     gameData->lastCrying = 0;
 
     while (true) {
-        printf("\n");
+
+        // TODO - Romain: Sur le clic du bouton 1, on passe à l'onglet suivant
+        // next_tab(game);
+
+        // TODO - Romain: Sur le clic du bouton 2, on donne l'énergie au personnage
+        // drink_energy(game);
+
+        // TODO - Romain: Sur la détection de la proximité, on alerte le personnage
+        // set_proximity(game, true | false);
+
+        // TODO - Romain: Sur la détection d'intercation sociale, on alerte le personnage
+        // set_social(game, 0 ou +);
+
+        // Je sais pas si pour les boutons on va avoir besoin de garder en mémoire le previous state
+        // pour pas envoyé 1000 fois la même action
+
         hardware_cry(game, gameData);
+
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 
 
 void app_main(void) {
+    /**
     int i2c_master_port = 0;
     i2c_config_t conf = {
             .mode = 1,
@@ -592,15 +691,13 @@ void app_main(void) {
             .scl_io_num = I2C_MASTER_SCL_IO,         // select GPIO specific to your project
             .scl_pullup_en = GPIO_PULLUP_ENABLE,
             .master.clk_speed = I2C_MASTER_FREQ_HZ,  // select frequency specific to your project
-            // .clk_flags = 0,          /*!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here. */
+            // .clk_flags = 0,          //!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here.
     };
 
-    setupIO();
-    ble_init();
-    init_SCAN();
 
     i2c_lcd1602_info_t *i2c_lcd1602_info = i2c_lcd1602_malloc();
     global_info = i2c_lcd1602_info;
+
     smbus_info_t *smbus_info = malloc(sizeof(smbus_info_t));
     smbus_init(smbus_info, 0, MPU9250_SENSOR_ADDR);
 
@@ -615,26 +712,24 @@ void app_main(void) {
     lcd_clear(i2c_lcd1602_info);
     lcd_write(i2c_lcd1602_info, "Hello test3");
     img_line();
-    uint8_t charset[] = {0x0E, 0x0A, 0x0E, 0x0A, 0x0A, 0x0A, 0x1F, 0x1B};
-    lcd_define_char(i2c_lcd1602_info, 1, charset);
 
-    uint8_t charset2[] = {0x0A, 0x15, 0x15, 0x11, 0x11, 0x0A, 0x04, 0x00};
-    lcd_define_char(i2c_lcd1602_info, 2, charset2);
-
-
-    lcd_move_cursor(i2c_lcd1602_info, 1, 1);
+     lcd_move_cursor(i2c_lcd1602_info, 1, 1);
     _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
     _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_2);
 
      xTaskCreate(buttonTest, "buttonTest", 2048, NULL, 10, NULL);
+     */
 
-    Game *game = malloc(sizeof(Game));
-    initGame(game);
+    setupIO();
+    ble_init();
+    init_SCAN();
+    initializeLCD();
 
-    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
     lcd_define_char(i2c_lcd1602_info, 3, charProgressEmpty);
     lcd_define_char(i2c_lcd1602_info, 4, charProgressFull);
-    lcd_define_char(i2c_lcd1602_info, 4, charFlag);
+    lcd_define_char(i2c_lcd1602_info, 5, charFlag);
+    lcd_move_cursor(i2c_lcd1602_info, 0, 14);
+    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_5);
 
     Game game = initializeGame();
 
