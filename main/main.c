@@ -22,62 +22,64 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "initi2c.h"
-#include "initBLE.h"
-#include "scanBLE.h"
+//#include "initBLE.h"
+//#include "scanBLE.h"
 #include "esp_log.h"
 #include "driver/i2c.h"
 
-#define RED_BUTTON                  35
-#define BLUE_BUTTON                  32
+#define RED_BUTTON 35
+#define BLUE_BUTTON 32
 
 i2c_lcd1602_info_t *global_info;
 
-const double BASE_FRAMEWORK_PROGRESS = 10;
+const int BASE_FRAMEWORK_PROGRESS = 10;
 const int BASE_ENERGY_INCREASE = 2;
 const int BASE_ENERGY_DECREASE = 1;
 const int MAX_ENERGY = 1000;
 const int MAX_QUALITY = 5;
-const int FRAMEWORK_CREATION_EXP = 500;
+const int FRAMEWORK_CREATION_EXP = 50;
 const int EXPERIENCE_QUALITY_MULTIPLIER = 10;
 
 // Queue
 #define MAX_QUEUE_SIZE 20
+
+#define REPOSE 0
+#define FATIGUE 1
+#define EPUISE 2
+#define HYPERACTIF 3
+#define SOLITAIRE 4
+
 typedef struct {
     int array[MAX_QUEUE_SIZE];
     int last;
 } Queue;
 
-
-
-enum State {
-    REPOSE,
-    FATIGUE,
-    EPUISE,
-    HYPERACTIF,
-    SOLITAIRE
-};
-
-typedef struct {
-    enum State avatarState;
+typedef struct Game {
+    int avatarState;
 
     // Level
-    double level;
-    double experience;
+    int level;
+    int experience;
     double stateExperienceMultiplier; // Multiplier for the experience gain
 
     // Framework
     int framework; //Number of framework
-    Queue frameworkLevel; // Circular queue to get an average of the last 20 framework levels
     double frameworkQualityMultiplier; // Multiplier for the framework quality
     double frameworkSpeedMultiplier; // Multiplier for the framework speed
-    double activeFrameworkProgress; // Progress of the active framework
+    int activeFrameworkProgress; // Progress of the active framework
     int lastFrameworkLevel; // Last framework level
 
     // Proximity
     int lastProximity; // Last time proximity was detected
     bool isProximityActive; // Is proximity active
+
+    // Social
+    int social; // Number of social interactions
+    int lastSocial; // Last time social interaction was detected
+    double socialMultiplier; // Multiplier for the social interaction
 
     // Energy
     int energy;
@@ -86,22 +88,64 @@ typedef struct {
     int lastEnergyIncrease; // Last time energy was increased
 } Game;
 
+typedef struct GameData {
+    int lastCrying; // Last time crying was executed
+} GameData;
+
+Game initializeGame() {
+    Game newGame;
+
+    time_t currentTime;
+    time(&currentTime);
+
+    // Set default values
+    newGame.avatarState = 0;  // Set to the default avatar state
+
+    // Initialize other members with default values
+    newGame.level = 1;
+    newGame.experience = 0;
+    newGame.stateExperienceMultiplier = 1.0;
+
+    newGame.framework = 0;
+    newGame.frameworkQualityMultiplier = 1.0;
+    newGame.frameworkSpeedMultiplier = 1.0;
+    newGame.activeFrameworkProgress = 0;
+    newGame.lastFrameworkLevel = -1;
+
+    newGame.lastProximity = currentTime;
+    newGame.isProximityActive = false;
+
+    newGame.social = 0;
+    newGame.lastSocial = currentTime;
+    newGame.socialMultiplier = 1.0;
+
+    newGame.energy = 1000;  // Set an initial energy value
+    newGame.energyMultiplier = 1;
+    newGame.energyIncrease = 0;
+    newGame.lastEnergyIncrease = currentTime;
+
+    return newGame;
+}
+
+
 int enqueue(Queue *queue, int value);
+
 void initQueue(Queue *queue);
-float get_framework_average(Queue *queue);
+
+int get_framework_average(Queue *queue);
+
 void initGame(Game *game);
+
 void get_avatar_state(Game *game);
+
 void set_proximity(Game *game, bool isProximityActive);
 
 void initGame(Game *game) {
     game->avatarState = REPOSE;
-    game->energy = 1000;
 
     game->level = 0;
     game->experience = 0;
     game->stateExperienceMultiplier = 1;
-
-    initQueue(&(game->frameworkLevel));
 
     game->framework = 0;
     game->frameworkQualityMultiplier = 1;
@@ -114,6 +158,12 @@ void initGame(Game *game) {
 
     game->lastProximity = currentTime;
     game->isProximityActive = false;
+
+    game->social = 0;
+    game->lastSocial = currentTime;
+    game->socialMultiplier = 1.5;
+
+    game->energy = 1000;
     game->energyMultiplier = 1;
     game->energyIncrease = 0;
     game->lastEnergyIncrease = currentTime;
@@ -122,6 +172,10 @@ void initGame(Game *game) {
 // constructor
 void initQueue(Queue *queue) {
     queue->last = -1;
+
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        queue->array[i] = 0;
+    }
 }
 
 // Circular queue to get an average of the last 20 framework levels
@@ -133,11 +187,7 @@ int enqueue(Queue *queue, int value) {
 }
 
 // Get the average of the last 20 framework levels
-float get_framework_average(Queue *queue) {
-    if (queue->last < MAX_QUEUE_SIZE) {
-        return 0;
-    }
-
+int get_framework_average(Queue *queue) {
     int sum = 0;
     for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
         sum += queue->array[i];
@@ -197,7 +247,7 @@ void setupIO() {
 
 // TODO: Add proper values
 void get_avatar_state(Game *game) {
-    if (game->energy < 100) {
+    if (game->energy < 300) {
         game->avatarState = FATIGUE;
     } else if (game->energy < 50) {
         game->avatarState = EPUISE;
@@ -214,8 +264,7 @@ void get_avatar_state(Game *game) {
 void set_proximity(Game *game, bool isProximityActive) {
     game->isProximityActive = isProximityActive;
 
-    if (!isProximityActive)
-    {
+    if (!isProximityActive) {
         return;
     }
 
@@ -250,7 +299,9 @@ void progress_energy(Game *game) {
             game->energyMultiplier = 1;
         }
     } else {
-        game->energy -= BASE_ENERGY_DECREASE;
+        if (game->energy < 1000) {
+            game->energy -= BASE_ENERGY_DECREASE;
+        }
     }
 }
 
@@ -269,12 +320,12 @@ void drink_energy(Game *game) {
 }
 
 
-
-char* get_current_time() {
+// TODO: Add wifi to sync time
+char *get_current_time() {
     time_t currentTime;
     time(&currentTime);
 
-    char* timeString = (char*)malloc(6);
+    char *timeString = (char *) malloc(6);
 
     struct tm *localTime = localtime(&currentTime);
     sprintf(timeString, "%02d:%02d", localTime->tm_hour, localTime->tm_min);
@@ -282,6 +333,106 @@ char* get_current_time() {
     return timeString;
 }
 
+
+void set_state_custom_char(State *state) {
+    switch (state->avatarState) {
+        case REPOSE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateRepose1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateRepose2);
+            break;
+        }
+        case FATIGUE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateTired1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateTired2);
+            break;
+        }
+        case EPUISE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateWornOut1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateWornOut2);
+            break;
+        }
+        case HYPERACTIF: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateHyperactive1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateHyperactive2);
+            break;
+        }
+        case SOLITAIRE: {
+            lcd_define_char(i2c_lcd1602_info, 1, charStateAlone1);
+            lcd_define_char(i2c_lcd1602_info, 2, charStateAlone2);
+            break;
+        }
+    }
+}
+
+
+void set_social(Game *game, int quantity) {
+    if (quantity <= 0) {
+        return;
+    }
+
+    time_t currentTime;
+    time(&currentTime);
+
+    game->lastSocial = currentTime;
+    game->social = quantity;
+
+    set_social_multiplier(game);
+}
+
+// TODO: Add proper values
+void set_social_multiplier(Game *game) {
+    time_t currentTime;
+    time(&currentTime);
+
+    if (game->social > 0) {
+        game->socialMultiplier = 1.5 * (double) game->social;
+    } else if (currentTime - game->lastSocial < 60) {
+        game->socialMultiplier = 1.5;
+    } else if (currentTime - game->lastSocial < 120) {
+        game->socialMultiplier = 1.25;
+    } else if (currentTime - game->lastSocial < 180) {
+        game->socialMultiplier = 1.0;
+    } else if (currentTime - game->lastSocial < 240) {
+        game->socialMultiplier = 0.75;
+    } else if (currentTime - game->lastSocial < 300) {
+        game->socialMultiplier = 0.5;
+    } else {
+        game->socialMultiplier = 0.25;
+    }
+
+    set_is_crying(game);
+}
+
+void set_is_crying(Game *game) {
+
+
+    if (game->socialMultiplier > 0.5) {
+        game->isCrying = false;
+    } else {
+        game->isCrying = true;
+    }
+}
+
+void hardware_cry(Game *game, GameData *gameData) {
+    if (game->isCrying) {
+        time_t currentTime;
+        time(&currentTime);
+
+        if (currentTime - gameData->lastCrying > 30) {
+            gameData->lastCrying = currentTime;
+            // TODO: Add crying sounds
+        }
+    }
+}
+
+void hardware_display_animation(int frame) {
+    lcd_move_cursor(i2c_lcd1602_info, 1, 12);
+    if (frame == 1) {
+        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+    } else {
+        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+    }
+}
 
 
 int get_next_level_experience(int level) {
@@ -298,8 +449,7 @@ void add_experience(Game *game, int quality) {
 }
 
 
-
-void add_framework(Game *game) {
+void add_framework(Game *game, Queue *frameworkQuality) {
     game->framework++;
     game->activeFrameworkProgress = 0;
 
@@ -309,18 +459,18 @@ void add_framework(Game *game) {
         quality = MAX_QUALITY;
     }
 
-    enqueue(&(game->frameworkLevel), quality);
+    enqueue(frameworkQuality, quality);
     game->lastFrameworkLevel = quality;
 
     add_experience(game, quality);
 }
 
-void progress_framework(Game *game) {
+void progress_framework(Game *game, Queue *frameworkQuality) {
     double progress = BASE_FRAMEWORK_PROGRESS * game->frameworkSpeedMultiplier + game->level;
-    game->activeFrameworkProgress += (int)progress;
+    game->activeFrameworkProgress += (int) progress;
 
     if (game->activeFrameworkProgress >= FRAMEWORK_CREATION_EXP) {
-        add_framework(game);
+        add_framework(game, frameworkQuality);
     }
 }
 
@@ -328,8 +478,8 @@ void progress_framework(Game *game) {
 void get_framework_multipliers(Game *game) {
     switch (game->avatarState) {
         case REPOSE:
-            game->frameworkQualityMultiplier = 1;
-            game->frameworkSpeedMultiplier = 1;
+            game->frameworkQualityMultiplier = 1.25;
+            game->frameworkSpeedMultiplier = 1.25;
             game->stateExperienceMultiplier = 3;
             break;
         case FATIGUE:
@@ -355,38 +505,83 @@ void get_framework_multipliers(Game *game) {
     }
 }
 
-void update_screen(Game *game)
-{
+
+// DEBUG
+void print_queue(Queue *queue) {
+    printf("Queue: ");
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        printf("%d ", queue->array[i]);
+    }
+    printf("\n");
+
+    printf("Average: %d\n", get_framework_average(queue));
+}
+
+// DEBUG
+void print_game(Game *game) {
+    printf("int level %d\n", game->level);
+    printf("int experience %d\n", game->experience);
+    printf("double stateExperienceMultiplier %f\n", game->stateExperienceMultiplier);
+    printf("int framework %d\n", game->framework);
+    printf("double frameworkQualityMultiplier %f\n", game->frameworkQualityMultiplier);
+    printf("double frameworkSpeedMultiplier %f\n", game->frameworkSpeedMultiplier);
+    printf("int activeFrameworkProgress %d\n", game->activeFrameworkProgress);
+    printf("int lastFrameworkLevel %d\n", game->lastFrameworkLevel);
+    printf("int lastProximity %d\n", game->lastProximity);
+    printf("bool isProximityActive %d\n", game->isProximityActive);
+    printf("int energy %d\n", game->energy);
+    printf("int energyMultiplier %d\n", game->energyMultiplier);
+    printf("int energyIncrease %d\n", game->energyIncrease);
+    printf("int lastEnergyIncrease %d\n\n", game->lastEnergyIncrease);
+}
+
+
+// TODO: Change to display on LCD
+void update_screen(Game *game) {
     printf("Framework Count: %d\n", game->framework);
     printf("Framework Progress: %d / 500\n", game->activeFrameworkProgress);
     printf("Energy value: %d\n", game->energy);
     printf("Experience value: %d\n", game->experience);
-    printf("Level value: %f\n", game->level);
+    printf("Level value: %d\n", game->level);
     printf("State value: %d\n", game->avatarState);
     printf("Framework quality: %d\n", game->lastFrameworkLevel);
     printf("Time %s\n", get_current_time());
 }
 
 void game_loop(Game *game) {
+
+
+    Queue *frameworkQuality = malloc(sizeof(Queue));
+    initQueue(frameworkQuality);
+
+    printf("Average: %d\n", get_framework_average(frameworkQuality));
+
     while (true) {
         get_avatar_state(game);
         get_framework_multipliers(game);
 
         progress_energy(game);
-        progress_framework(game);
+        progress_framework(game, frameworkQuality);
 
-        update_screen(game);
+        //print_queue(frameworkQuality);
+        //print_game(game);
+        // update_screen(game);
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 
 void hardware_loop(Game *game) {
+    GameData *gameData = malloc(sizeof(GameData));
+    gameData->lastCrying = 0;
+
     while (true) {
         printf("\n");
+        hardware_cry(game, gameData);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+
 
 void app_main(void) {
     int i2c_master_port = 0;
@@ -431,12 +626,18 @@ void app_main(void) {
     _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
     _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_2);
 
-    // xTaskCreate(buttonTest, "buttonTest", 2048, NULL, 10, NULL);
+     xTaskCreate(buttonTest, "buttonTest", 2048, NULL, 10, NULL);
 
-    Game game;
-    initGame(&game);
+    Game *game = malloc(sizeof(Game));
+    initGame(game);
 
+    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+    lcd_define_char(i2c_lcd1602_info, 3, charProgressEmpty);
+    lcd_define_char(i2c_lcd1602_info, 4, charProgressFull);
+    lcd_define_char(i2c_lcd1602_info, 4, charFlag);
+
+    Game game = initializeGame();
 
     xTaskCreate(game_loop, "game_loop", 4096, (void *) &game, 1, NULL);
-    xTaskCreate(hardware_loop, "hardware_loop", 4096, (void *) &game, 1, NULL);
+    hardware_loop(&game);
 }
