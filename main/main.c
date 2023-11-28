@@ -643,7 +643,7 @@ void game_loop(Game *game) {
         progress_energy(game);
         progress_framework(game, frameworkQuality);
 
-        hardware_display_animation(frame);
+        hardware_display_animation(frame, game);
         hardware_display_tab(game);
         hardware_display_avg_quality(frameworkQuality);
 
