@@ -163,6 +163,9 @@ void initializeLCD() {
     i2c_param_config(I2C_MASTER_NUM, &conf);
     i2c_driver_install(smbus_info->i2c_port, 1, 0, 0, ESP_INTR_FLAG_SHARED);
     i2c_master_start(i2c_cmd_link_create());
+
+    uint8_t data[2];
+    i2c_lcd1602_init(i2c_lcd1602_info, smbus_info, true, 2, 16, 16);
 }
 
 // Circular queue to get an average of the last 20 framework levels
@@ -503,9 +506,16 @@ void hardware_display_progress_bar(Game *game) {
 
 void hardware_display_avg_quality(Queue *queue) {
     int quality = get_framework_average(queue);
+    ESP_LOGE("SELF_ESP", "Hardware ");
+    ESP_LOGE("SELF_ESP", "%d", quality);
+
+    char pointeurStr[50] = "";
+    sprintf(pointeurStr, "%d", quality);
+
 
     lcd_move_cursor(i2c_lcd1602_info, 0, 14);
-    lcd_write(i2c_lcd1602_info, quality);
+
+    lcd_write(i2c_lcd1602_info, pointeurStr);
 }
 
 // Display experience and level
@@ -722,14 +732,14 @@ void app_main(void) {
 
     setupIO();
     ble_init();
-    init_SCAN();
+    // init_SCAN();
     initializeLCD();
 
-    lcd_define_char(i2c_lcd1602_info, 3, charProgressEmpty);
-    lcd_define_char(i2c_lcd1602_info, 4, charProgressFull);
-    lcd_define_char(i2c_lcd1602_info, 5, charFlag);
-    lcd_move_cursor(i2c_lcd1602_info, 0, 14);
-    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_5);
+    lcd_define_char(global_info, 3, charProgressEmpty);
+    lcd_define_char(global_info, 4, charProgressFull);
+    lcd_define_char(global_info, 5, charFlag);
+    lcd_move_cursor(global_info, 0, 14);
+    _write_data(global_info, I2C_LCD1602_INDEX_CUSTOM_5);
 
     Game game = initializeGame();
 

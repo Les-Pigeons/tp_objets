@@ -336,7 +336,6 @@ esp_err_t lcd_write(const i2c_lcd1602_info_t * i2c_lcd1602_info, const char * st
     esp_err_t err = ESP_FAIL;
     if (_is_init(i2c_lcd1602_info))
     {
-        //ESP_LOGI(TAG, "lcd_write: %s", string);
         err = ESP_OK;
         for (int i = 0; err == ESP_OK && string[i]; ++i)
         {
