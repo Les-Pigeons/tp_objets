@@ -33,6 +33,7 @@
 
 #define RED_BUTTON 35
 #define BLUE_BUTTON 32
+#define SKREEEEEEEE 25
 
 i2c_lcd1602_info_t *global_info;
 
@@ -223,6 +224,7 @@ void buttonTest(void *pParam) {
 void setupIO() {
     gpio_set_direction(RED_BUTTON, GPIO_MODE_INPUT);
     gpio_set_direction(BLUE_BUTTON, GPIO_MODE_INPUT);
+    gpio_set_direction(SKREEEEEEEE, GPIO_MODE_OUTPUT);
 }
 
 void set_state_custom_char(int state) {
@@ -413,7 +415,10 @@ void hardware_cry(Game *game, GameData *gameData) {
 
         if (currentTime - gameData->lastCrying > 30) {
             gameData->lastCrying = currentTime;
-            // TODO - Romain:  Add crying sounds
+            ESP_LOGE("SELF_ESP", "Crying...");
+            gpio_set_level(SKREEEEEEEE, 1);
+        } else {
+            gpio_set_level(SKREEEEEEEE, 0);
         }
     }
 }
@@ -466,7 +471,7 @@ void progress_framework(Game *game, Queue *frameworkQuality) {
 
 
 void hardware_display_animation_header(int frame, char* str1, char* str2) {
-    lcd_move_cursor(i2c_lcd1602_info, 0, 10);
+    lcd_move_cursor(i2c_lcd1602_info, 10, 0);
     if (frame == 1) {
         lcd_write(i2c_lcd1602_info, str1);
     } else {
@@ -475,7 +480,7 @@ void hardware_display_animation_header(int frame, char* str1, char* str2) {
 }
 
 void hardware_display_animation(int frame, Game *game) {
-    lcd_move_cursor(i2c_lcd1602_info, 1, 12);
+    lcd_move_cursor(i2c_lcd1602_info, 12, 1);
     if (frame == 1) {
         _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
     } else {
@@ -506,14 +511,12 @@ void hardware_display_progress_bar(Game *game) {
 
 void hardware_display_avg_quality(Queue *queue) {
     int quality = get_framework_average(queue);
-    ESP_LOGE("SELF_ESP", "Hardware ");
-    ESP_LOGE("SELF_ESP", "%d", quality);
 
     char pointeurStr[50] = "";
     sprintf(pointeurStr, "%d", quality);
 
 
-    lcd_move_cursor(i2c_lcd1602_info, 0, 14);
+    lcd_move_cursor(i2c_lcd1602_info, 14, 0);
 
     lcd_write(i2c_lcd1602_info, pointeurStr);
 }
@@ -738,7 +741,7 @@ void app_main(void) {
     lcd_define_char(global_info, 3, charProgressEmpty);
     lcd_define_char(global_info, 4, charProgressFull);
     lcd_define_char(global_info, 5, charFlag);
-    lcd_move_cursor(global_info, 0, 14);
+    lcd_move_cursor(global_info, 14, 0);
     _write_data(global_info, I2C_LCD1602_INDEX_CUSTOM_5);
 
     Game game = initializeGame();
