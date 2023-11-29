@@ -31,7 +31,7 @@
 #include "driver/i2c.h"
 #include "characters.h"
 
-#define RED_BUTTON 35
+#define NEXT 35
 #define BLUE_BUTTON 32
 #define SKREEEEEEEE 25
 
@@ -201,7 +201,7 @@ void buttonTest(void *pParam) {
     lcd_write(global_info, "Button not pressed");
 
     while (1) {
-        if (gpio_get_level(RED_BUTTON) == 1 && !buttonPressed) {
+        if (gpio_get_level(NEXT) == 1 && !buttonPressed) {
             count++;
             lcd_clear(global_info);
             sprintf(pointeurStr, "%d times", count);
@@ -222,7 +222,7 @@ void buttonTest(void *pParam) {
 }
 
 void setupIO() {
-    gpio_set_direction(RED_BUTTON, GPIO_MODE_INPUT);
+    gpio_set_direction(NEXT, GPIO_MODE_INPUT);
     gpio_set_direction(BLUE_BUTTON, GPIO_MODE_INPUT);
     gpio_set_direction(SKREEEEEEEE, GPIO_MODE_OUTPUT);
 }
@@ -415,8 +415,9 @@ void hardware_cry(Game *game, GameData *gameData) {
 
         if (currentTime - gameData->lastCrying > 30) {
             gameData->lastCrying = currentTime;
-            ESP_LOGE("SELF_ESP", "Crying...");
             gpio_set_level(SKREEEEEEEE, 1);
+            vTaskDelay(900 / portTICK_PERIOD_MS);
+            gpio_set_level(SKREEEEEEEE, 0);
         } else {
             gpio_set_level(SKREEEEEEEE, 0);
         }
@@ -669,11 +670,17 @@ void game_loop(Game *game) {
 void hardware_loop(Game *game) {
     GameData *gameData = malloc(sizeof(GameData));
     gameData->lastCrying = 0;
+    bool buttonPressed = false;
 
     while (true) {
 
-        // TODO - Romain: Sur le clic du bouton 1, on passe à l'onglet suivant
-        // next_tab(game);
+        if (gpio_get_level(NEXT) == 1 && !buttonPressed) {
+            ESP_LOGW("SELF_LOOP", "Switch screen");
+            next_tab(game);
+            buttonPressed = true;
+        }
+
+
 
         // TODO - Romain: Sur le clic du bouton 2, on donne l'énergie au personnage
         // drink_energy(game);
@@ -687,9 +694,13 @@ void hardware_loop(Game *game) {
         // Je sais pas si pour les boutons on va avoir besoin de garder en mémoire le previous state
         // pour pas envoyé 1000 fois la même action
 
+        if (gpio_get_level(NEXT) == 0 && buttonPressed) {
+            buttonPressed = false;
+        }
+
         hardware_cry(game, gameData);
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
