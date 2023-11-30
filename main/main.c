@@ -40,7 +40,7 @@
 i2c_lcd1602_info_t *global_info;
 
 const int BASE_FRAMEWORK_PROGRESS = 10;
-const int BASE_ENERGY_INCREASE = 2;
+const int BASE_ENERGY_INCREASE = 3;
 const int BASE_ENERGY_DECREASE = 1;
 const int MAX_ENERGY = 1000;
 const int MAX_QUALITY = 5;
@@ -236,13 +236,13 @@ void set_state_custom_char(int state) {
 
 // TODO: Add proper values
 void get_avatar_state(Game *game) {
-    if (game->energy < 300) {
-        game->avatarState = FATIGUE;
-    } else if (game->energy < 50) {
+    if (game->energy < 50) {
         game->avatarState = EPUISE;
-    } else if (game->energy > 1000) {
+    } else if (game->energy < 300) {
+        game->avatarState = FATIGUE;
+    } else if (game->energy > 900) {
         game->avatarState = HYPERACTIF;
-    } else if (game->lastProximity < 1000) {
+    } else if (game->lastProximity > 1000) {
         game->avatarState = SOLITAIRE;
     } else {
         game->avatarState = REPOSE;
@@ -456,7 +456,7 @@ void progress_framework(Game *game, Queue *frameworkQuality) {
 
 
 void hardware_display_animation_header(int frame, char* str1, char* str2) {
-    lcd_move_cursor(i2c_lcd1602_info, 10, 0);
+    lcd_move_cursor(i2c_lcd1602_info, 11, 0);
     if (frame == 1) {
         lcd_write(i2c_lcd1602_info, str1);
     } else {
@@ -473,15 +473,17 @@ void hardware_display_animation(int frame, Game *game) {
     }
 
     if (game->isProximityActive) {
-        hardware_display_animation_header(frame, "!?!", "?!?");
+        hardware_display_animation_header(frame, "!?", "?!");
     } else if (game->avatarState == EPUISE) {
-        hardware_display_animation_header(frame, "ZzZ", "zZz");
+        hardware_display_animation_header(frame, "Zz", "zZ");
+    } else {
+        hardware_display_animation_header(frame, "  ", "  ");
     }
 }
 
 
 void hardware_display_progress_bar(Game *game) {
-    int progress = round(game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
+    int progress = (int)round((double)game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
 
     for (int i = 0; i < 10; i++) {
         lcd_move_cursor(i2c_lcd1602_info, i, 1);
@@ -497,13 +499,14 @@ void hardware_display_progress_bar(Game *game) {
 void hardware_display_avg_quality(Queue *queue) {
     int quality = get_framework_average(queue);
 
-    char pointeurStr[50] = "";
+    char pointeurStr[2] = "";
     sprintf(pointeurStr, "%d", quality);
 
 
     lcd_move_cursor(i2c_lcd1602_info, 14, 0);
-
     lcd_write(i2c_lcd1602_info, pointeurStr);
+    lcd_move_cursor(global_info, 15, 0);
+    _write_data(global_info, I2C_LCD1602_INDEX_CUSTOM_5);
 }
 
 // Display experience and level
@@ -519,6 +522,7 @@ void hardware_display_tab_1(Game *game) {
     lcd_write(i2c_lcd1602_info, formattedString);
 }
 
+// TODO - Romain Trouver une solution pour définir l'heure (wifi)
 // Display energy and time
 void hardware_display_tab_2(Game *game) {
     char formattedString[11];
@@ -701,7 +705,7 @@ void app_main(void) {
     lcd_define_char(global_info, 3, charProgressEmpty);
     lcd_define_char(global_info, 4, charProgressFull);
     lcd_define_char(global_info, 5, charFlag);
-    lcd_move_cursor(global_info, 14, 0);
+    lcd_move_cursor(global_info, 15, 0);
     _write_data(global_info, I2C_LCD1602_INDEX_CUSTOM_5);
 
     Game game = initializeGame();
