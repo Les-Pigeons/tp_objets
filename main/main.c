@@ -32,8 +32,10 @@
 #include "characters.h"
 
 #define NEXT 35
-#define BLUE_BUTTON 32
+#define ENERGY 32
 #define SKREEEEEEEE 25
+#define LIGHT 19
+#define TAG "SELF_LOOP"
 
 i2c_lcd1602_info_t *global_info;
 
@@ -46,6 +48,7 @@ const int FRAMEWORK_CREATION_EXP = 500;
 const int EXPERIENCE_QUALITY_MULTIPLIER = 10;
 
 static const i2c_lcd1602_info_t *i2c_lcd1602_info;
+static bool light_on = false;
 
 // Queue
 #define MAX_QUEUE_SIZE 20
@@ -186,45 +189,18 @@ void img_line() {
 }
 
 void txt_home() {
-    lcd_move_cursor(global_info, 5, 0);
+    lcd_move_cursor(global_info, 0, 0);
 }
 
 void txt_line() {
-    lcd_move_cursor(global_info, 5, 1);
-}
-
-void buttonTest(void *pParam) {
-    bool buttonPressed = false;
-    int count = 998;
-    char pointeurStr[50] = "";
-    lcd_clear(global_info);
-    lcd_write(global_info, "Button not pressed");
-
-    while (1) {
-        if (gpio_get_level(NEXT) == 1 && !buttonPressed) {
-            count++;
-            lcd_clear(global_info);
-            sprintf(pointeurStr, "%d times", count);
-            lcd_write(global_info, pointeurStr);
-            txt_line();
-            lcd_write(global_info, "Coucou :)");
-        }
-        if (gpio_get_level(BLUE_BUTTON) == 1 && !buttonPressed) {
-            count--;
-            lcd_clear(global_info);
-            sprintf(pointeurStr, "%d times", count);
-            lcd_write(global_info, pointeurStr);
-            txt_line();
-            lcd_write(global_info, "Coucou :)");
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
+    lcd_move_cursor(global_info, 0, 1);
 }
 
 void setupIO() {
     gpio_set_direction(NEXT, GPIO_MODE_INPUT);
-    gpio_set_direction(BLUE_BUTTON, GPIO_MODE_INPUT);
+    gpio_set_direction(ENERGY, GPIO_MODE_INPUT);
     gpio_set_direction(SKREEEEEEEE, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LIGHT, GPIO_MODE_OUTPUT);
 }
 
 void set_state_custom_char(int state) {
@@ -304,6 +280,7 @@ void set_proximity(Game *game, bool isProximityActive) {
 // Manage energy increase and decrease
 void progress_energy(Game *game) {
     if (game->energyIncrease > 0) {
+
         int energyIncrease = BASE_ENERGY_INCREASE * game->energyMultiplier;
 
         if (game->energyIncrease < energyIncrease) {
@@ -323,7 +300,7 @@ void progress_energy(Game *game) {
             game->energyMultiplier = 1;
         }
     } else {
-        if (game->energy < 1000 && game->energy > 0) {
+        if (game->energy <= 1000 && game->energy > 0) {
             game->energy -= BASE_ENERGY_DECREASE;
         }
     }
@@ -425,8 +402,15 @@ void hardware_cry(Game *game, GameData *gameData) {
 }
 
 void hardware_low_energy(Game *game) {
-    if (game->energy < 300) {
-        // TODO - Romain: On allume une led
+    if (game->energy < 300 && !light_on) {
+        ESP_LOGW(TAG, "Light on");
+        gpio_set_level(LIGHT, 1);
+        light_on = true;
+    }
+    if (game->energy >= 300 && light_on) {
+        ESP_LOGW(TAG, "Light off");
+        gpio_set_level(LIGHT, 0);
+        light_on = false;
     }
 }
 
@@ -485,7 +469,7 @@ void hardware_display_animation(int frame, Game *game) {
     if (frame == 1) {
         _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
     } else {
-        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
+        _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_2);
     }
 
     if (game->isProximityActive) {
@@ -500,12 +484,12 @@ void hardware_display_progress_bar(Game *game) {
     int progress = round(game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
 
     for (int i = 0; i < 10; i++) {
-        lcd_move_cursor(i2c_lcd1602_info, 1, i);
+        lcd_move_cursor(i2c_lcd1602_info, i, 1);
 
         if (i < progress) {
             _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_4);
         } else {
-            _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_4);
+            _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_3);
         }
     }
 }
@@ -647,6 +631,7 @@ void game_loop(Game *game) {
     int frame = 0;
 
     printf("Average: %d\n", get_framework_average(frameworkQuality));
+    ESP_LOGW(TAG, "Game loop entrance");
 
     while (true) {
         frame = (frame + 1) % 2;
@@ -676,14 +661,15 @@ void hardware_loop(Game *game) {
 
         if (gpio_get_level(NEXT) == 1 && !buttonPressed) {
             ESP_LOGW("SELF_LOOP", "Switch screen");
+            lcd_clear(global_info);
             next_tab(game);
             buttonPressed = true;
         }
-
-
-
-        // TODO - Romain: Sur le clic du bouton 2, on donne l'énergie au personnage
-        // drink_energy(game);
+        if (gpio_get_level(ENERGY) == 1 && !buttonPressed) {
+            ESP_LOGW("SELF_LOOP", "ENERGY");
+            drink_energy(game);
+            buttonPressed = true;
+        }
 
         // TODO - Romain: Sur la détection de la proximité, on alerte le personnage
         // set_proximity(game, true | false);
@@ -694,7 +680,7 @@ void hardware_loop(Game *game) {
         // Je sais pas si pour les boutons on va avoir besoin de garder en mémoire le previous state
         // pour pas envoyé 1000 fois la même action
 
-        if (gpio_get_level(NEXT) == 0 && buttonPressed) {
+        if (gpio_get_level(NEXT) == 0 && gpio_get_level(ENERGY) == 0 && buttonPressed) {
             buttonPressed = false;
         }
 
@@ -706,43 +692,6 @@ void hardware_loop(Game *game) {
 
 
 void app_main(void) {
-    /**
-    int i2c_master_port = 0;
-    i2c_config_t conf = {
-            .mode = 1,
-            .sda_io_num = I2C_MASTER_SDA_IO,         // select GPIO specific to your project
-            .sda_pullup_en = GPIO_PULLUP_ENABLE,
-            .scl_io_num = I2C_MASTER_SCL_IO,         // select GPIO specific to your project
-            .scl_pullup_en = GPIO_PULLUP_ENABLE,
-            .master.clk_speed = I2C_MASTER_FREQ_HZ,  // select frequency specific to your project
-            // .clk_flags = 0,          //!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here.
-    };
-
-
-    i2c_lcd1602_info_t *i2c_lcd1602_info = i2c_lcd1602_malloc();
-    global_info = i2c_lcd1602_info;
-
-    smbus_info_t *smbus_info = malloc(sizeof(smbus_info_t));
-    smbus_init(smbus_info, 0, MPU9250_SENSOR_ADDR);
-
-    i2c_param_config(I2C_MASTER_NUM, &conf);
-    i2c_driver_install(smbus_info->i2c_port, 1, 0, 0, ESP_INTR_FLAG_SHARED);
-    i2c_master_start(i2c_cmd_link_create());
-
-    uint8_t data[2];
-    i2c_lcd1602_init(i2c_lcd1602_info, smbus_info, true, 2, 16, 16);
-    lcd_write(i2c_lcd1602_info, "Hello Maxime!");
-    lcd_home(i2c_lcd1602_info);
-    lcd_clear(i2c_lcd1602_info);
-    lcd_write(i2c_lcd1602_info, "Hello test3");
-    img_line();
-
-     lcd_move_cursor(i2c_lcd1602_info, 1, 1);
-    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_1);
-    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_2);
-
-     xTaskCreate(buttonTest, "buttonTest", 2048, NULL, 10, NULL);
-     */
 
     setupIO();
     ble_init();
