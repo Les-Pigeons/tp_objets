@@ -1,21 +1,4 @@
-/* i2c - Simple example
 
-   Simple I2C example that shows how to initialize I2C
-   as well as reading and writing from and to registers for a sensor connected over I2C.
-
-   The sensor used in this example is a MPU9250 inertial measurement unit.
-
-   For other examples please check:
-   https://github.com/espressif/esp-idf/tree/master/examples
-
-   See README.md file to get detailed usage of this example.
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
@@ -23,6 +6,7 @@
 #include <time.h>
 #include <math.h>
 #include <stdbool.h>
+#include <sys/time.h>
 
 #include "initi2c.h"
 #include "initBLE.h"
@@ -35,7 +19,11 @@
 #define ENERGY 32
 #define SKREEEEEEEE 25
 #define LIGHT 19
+#define SENSOR 14
 #define TAG "SELF_LOOP"
+#define MAX_DISTANCE 400 // Maximum sensor distance is rated at 400-500cm.
+float timeOut = MAX_DISTANCE * 60;
+int soundVelocity = 340; // define sound speed=340m/s
 
 i2c_lcd1602_info_t *global_info;
 
@@ -49,6 +37,7 @@ const int EXPERIENCE_QUALITY_MULTIPLIER = 10;
 
 static const i2c_lcd1602_info_t *i2c_lcd1602_info;
 static bool light_on = false;
+static bool sensor = false;
 
 // Queue
 #define MAX_QUEUE_SIZE 20
@@ -201,6 +190,7 @@ void setupIO() {
     gpio_set_direction(ENERGY, GPIO_MODE_INPUT);
     gpio_set_direction(SKREEEEEEEE, GPIO_MODE_OUTPUT);
     gpio_set_direction(LIGHT, GPIO_MODE_OUTPUT);
+    gpio_set_direction(SENSOR, GPIO_MODE_INPUT);
 }
 
 void set_state_custom_char(int state) {
@@ -455,7 +445,7 @@ void progress_framework(Game *game, Queue *frameworkQuality) {
 }
 
 
-void hardware_display_animation_header(int frame, char* str1, char* str2) {
+void hardware_display_animation_header(int frame, char *str1, char *str2) {
     lcd_move_cursor(i2c_lcd1602_info, 11, 0);
     if (frame == 1) {
         lcd_write(i2c_lcd1602_info, str1);
@@ -481,9 +471,8 @@ void hardware_display_animation(int frame, Game *game) {
     }
 }
 
-
 void hardware_display_progress_bar(Game *game) {
-    int progress = (int)round((double)game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
+    int progress = (int) round((double) game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
 
     for (int i = 0; i < 10; i++) {
         lcd_move_cursor(i2c_lcd1602_info, i, 1);
@@ -676,7 +665,16 @@ void hardware_loop(Game *game) {
         }
 
         // TODO - Romain: Sur la détection de la proximité, on alerte le personnage
-        // set_proximity(game, true | false);
+        if (gpio_get_level(SENSOR) == 1 && !sensor) {
+            set_proximity(game, true);
+            ESP_LOGW(TAG, "Sensor UP");
+            sensor = true;
+        }
+        if (gpio_get_level(SENSOR) == 0 && sensor) {
+            set_proximity(game, false);
+            ESP_LOGW(TAG, "Sensor DOWN");
+            sensor = false;
+        }
 
         // TODO - Romain: Sur la détection d'intercation sociale, on alerte le personnage
         // set_social(game, 0 ou +);
@@ -694,12 +692,34 @@ void hardware_loop(Game *game) {
     }
 }
 
+void BLE_magic(Game *game) {
+    esp_err_t ret;
+    while (1) {
+        ble_kill();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        init_SCAN();
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        if (is_any_near) {
+            ESP_LOGW(TAG, "Found someone close");
+            set_social(game, 1);
+        } else {
+            ESP_LOGW(TAG, "I'm alone :'( ");
+            set_social(game, 0);
+        }
+
+        kill_scan();
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+        ble_emit();
+
+        vTaskDelay(60000 / portTICK_PERIOD_MS);
+    }
+}
 
 void app_main(void) {
-
     setupIO();
-    ble_init();
-    // init_SCAN();
+    ble_emit();
     initializeLCD();
 
     lcd_define_char(global_info, 3, charProgressEmpty);
@@ -711,5 +731,6 @@ void app_main(void) {
     Game game = initializeGame();
 
     xTaskCreate(game_loop, "game_loop", 4096, (void *) &game, 1, NULL);
+    xTaskCreate(BLE_magic, "BLE_magic", 4096, (void *) &game, 1, NULL);
     hardware_loop(&game);
 }

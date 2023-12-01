@@ -24,6 +24,7 @@ static bool connect = false;
 static bool get_server = false;
 static esp_gattc_char_elem_t *char_elem_result = NULL;
 static esp_gattc_descr_elem_t *descr_elem_result = NULL;
+static bool is_any_near = false;
 
 /* Declare static functions */
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
@@ -130,7 +131,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
     switch (event) {
         case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT: {
             //the unit of the duration is second
-            uint32_t duration = 50;
+            uint32_t duration = 10;
             esp_ble_gap_start_scanning(duration);
             break;
         }
@@ -148,17 +149,15 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
             switch (scan_result->scan_rst.search_evt) {
                 case ESP_GAP_SEARCH_INQ_RES_EVT:
                     if (scan_result->scan_rst.adv_data_len != 0) {
-                        adv_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv,
-                                                            ESP_BLE_AD_TYPE_NAME_CMPL, &adv_name_len);
                         if (adv_name_len != 0) {
-                            esp_log_buffer_hex(GATTC_TAG, scan_result->scan_rst.bda, 6);
                             uuid_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv,
                                                                  ESP_BLE_AD_TYPE_128SOL_SRV_UUID, &uuid_len);
 
                             esp_log_buffer_char(GATTC_TAG, adv_name, adv_name_len);
-                            esp_log_buffer_hex(GATTC_TAG, &scan_result->scan_rst.ble_adv[0],
-                                               scan_result->scan_rst.adv_data_len);
                         }
+                        is_any_near = true;
+                        esp_ble_gap_stop_scanning();
+                        break;
                     }
 
 #if CONFIG_EXAMPLE_DUMP_ADV_DATA_AND_SCAN_RESP
@@ -246,8 +245,21 @@ static void esp_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp
     } while (0);
 }
 
+bool any_near() {
+    return is_any_near;
+}
+
+void kill_scan() {
+    esp_bluedroid_disable();
+    esp_bluedroid_deinit();
+    esp_bt_controller_disable();
+    esp_bt_controller_deinit();
+    nvs_flash_deinit();
+}
+
 void init_SCAN() {
     ESP_LOGW("SELF_DEF", "Init scan");
+    is_any_near = false;
     // Initialize NVS.
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
