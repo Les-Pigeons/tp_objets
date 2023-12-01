@@ -171,11 +171,6 @@ i2c_lcd1602_info_t * i2c_lcd1602_malloc(void)
     if (i2c_lcd1602_info != NULL)
     {
         memset(i2c_lcd1602_info, 0, sizeof(*i2c_lcd1602_info));
-        ESP_LOGD(TAG, "malloc i2c_lcd1602_info_t %p", i2c_lcd1602_info);
-    }
-    else
-    {
-        ESP_LOGE(TAG, "malloc i2c_lcd1602_info_t failed");
     }
     return i2c_lcd1602_info;
 }
@@ -191,7 +186,6 @@ esp_err_t smbus_init(smbus_info_t * smbus_info, i2c_port_t i2c_port, i2c_address
     }
     else
     {
-        ESP_LOGE(TAG, "smbus_info is NULL");
         return ESP_FAIL;
     }
     return ESP_OK;
@@ -204,19 +198,14 @@ static esp_err_t _check_i2c_error(esp_err_t err)
         case ESP_OK:  // Success
             break;
         case ESP_ERR_INVALID_ARG:  // Parameter error
-            ESP_LOGE(TAG, "I2C parameter error");
             break;
         case ESP_FAIL: // Sending command error, slave doesn't ACK the transfer.
-            ESP_LOGE(TAG, "I2C no slave ACK");
             break;
         case ESP_ERR_INVALID_STATE:  // I2C driver not installed or not in master mode.
-            ESP_LOGE(TAG, "I2C driver not installed or not master");
             break;
         case ESP_ERR_TIMEOUT:  // Operation timeout because the bus is busy.
-            ESP_LOGE(TAG, "I2C timeout");
             break;
         default:
-            ESP_LOGE(TAG, "I2C error %d", err);
     }
     return err;
 }
@@ -238,14 +227,6 @@ static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info)
         {
             ok = true;
         }
-        else
-        {
-            ESP_LOGE(TAG, "i2c_lcd1602_info is not initialised");
-        }
-    }
-    else
-    {
-        ESP_LOGE(TAG, "i2c_lcd1602_info is NULL");
     }
     return ok;
 }
@@ -270,7 +251,6 @@ esp_err_t smbus_send_byte(const smbus_info_t * smbus_info, uint8_t data)
 static esp_err_t _write_to_expander(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
 {
     // backlight flag must be included with every write to maintain backlight state
-    ESP_LOGD(TAG, "_write_to_expander 0x%02x", data | i2c_lcd1602_info->backlight_flag);
     return smbus_send_byte(i2c_lcd1602_info->smbus_info, data | i2c_lcd1602_info->backlight_flag);
 }
 
@@ -290,7 +270,6 @@ static esp_err_t _strobe_enable(const i2c_lcd1602_info_t * i2c_lcd1602_info, uin
 // send top nibble to the LCD controller
 static esp_err_t _write_top_nibble(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
 {
-    ESP_LOGD(TAG, "_write_top_nibble 0x%02x", data);
     esp_err_t err1 = _write_to_expander(i2c_lcd1602_info, data);
     esp_err_t err2 = _strobe_enable(i2c_lcd1602_info, data);
     return err1 ? err1 : err2;
@@ -299,7 +278,6 @@ static esp_err_t _write_top_nibble(const i2c_lcd1602_info_t * i2c_lcd1602_info, 
 // send command or data to controller
 static esp_err_t _write(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t value, uint8_t register_select_flag)
 {
-    ESP_LOGD(TAG, "_write 0x%02x | 0x%02x", value, register_select_flag);
     esp_err_t err1 = _write_top_nibble(i2c_lcd1602_info, (value & 0xf0) | register_select_flag);
     esp_err_t err2 = _write_top_nibble(i2c_lcd1602_info, ((value & 0x0f) << 4) | register_select_flag);
     return err1 ? err1 : err2;
@@ -308,14 +286,12 @@ static esp_err_t _write(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t val
 // send command to controller
 static esp_err_t _write_command(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t command)
 {
-    ESP_LOGD(TAG, "_write_command 0x%02x", command);
     return _write(i2c_lcd1602_info, command, FLAG_RS_COMMAND);
 }
 
 // send data to controller
 static esp_err_t _write_data(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t data)
 {
-    ESP_LOGD(TAG, "_write_data 0x%02x", data);
     return _write(i2c_lcd1602_info, data, FLAG_RS_DATA);
 }
 
@@ -383,7 +359,6 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_to_expander 1 failed: %d", last_err);
     }
 
     esp_rom_delay_us(1000);
@@ -393,7 +368,6 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_top_nibble 1 failed: %d", last_err);
     }
 
     esp_rom_delay_us(DELAY_INIT_1);
@@ -403,7 +377,6 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_top_nibble 2 failed: %d", last_err);
     }
 
     esp_rom_delay_us(DELAY_INIT_2);
@@ -413,7 +386,6 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_top_nibble 3 failed: %d", last_err);
     }
 
     esp_rom_delay_us(DELAY_INIT_3);
@@ -423,7 +395,6 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_top_nibble 4 failed: %d", last_err);
     }
 
     // now we can use the command()/write() functions
@@ -431,35 +402,30 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_command 1 failed: %d", last_err);
     }
 
     if ((last_err = _write_command(i2c_lcd1602_info, COMMAND_DISPLAY_CONTROL | i2c_lcd1602_info->display_control_flags)) != ESP_OK)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_command 2 failed: %d", last_err);
     }
 
     if ((last_err = lcd_clear(i2c_lcd1602_info)) != ESP_OK)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: lcd_clear failed: %d", last_err);
     }
 
     if ((last_err = _write_command(i2c_lcd1602_info, COMMAND_ENTRY_MODE_SET | i2c_lcd1602_info->entry_mode_flags)) != ESP_OK)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: _write_command 3 failed: %d", last_err);
     }
 
     if ((last_err = lcd_home(i2c_lcd1602_info)) != ESP_OK)
     {
         if (first_err == ESP_OK)
             first_err = last_err;
-        ESP_LOGE(TAG, "reset: lcd_home failed: %d", last_err);
     }
 
     return first_err;
@@ -492,7 +458,6 @@ esp_err_t i2c_lcd1602_init(i2c_lcd1602_info_t * i2c_lcd1602_info, smbus_info_t *
     }
     else
     {
-        ESP_LOGE(TAG, "i2c_lcd1602_info is NULL");
         err = ESP_FAIL;
     }
     return err;

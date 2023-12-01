@@ -10,7 +10,6 @@
 #include "esp_gattc_api.h"
 #include "esp_gatt_defs.h"
 #include "esp_bt_main.h"
-#include "esp_gatt_common_api.h"
 
 #define GATTC_TAG "GATTC_SCAN"
 #define REMOTE_SERVICE_UUID        0xFEBE
@@ -125,9 +124,7 @@ gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, 
 
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
     uint8_t *adv_name = NULL;
-    uint8_t *uuid_name = NULL;
     uint8_t adv_name_len = 0;
-    uint8_t uuid_len = 0;
     switch (event) {
         case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT: {
             //the unit of the duration is second
@@ -149,12 +146,6 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
             switch (scan_result->scan_rst.search_evt) {
                 case ESP_GAP_SEARCH_INQ_RES_EVT:
                     if (scan_result->scan_rst.adv_data_len != 0) {
-                        if (adv_name_len != 0) {
-                            uuid_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv,
-                                                                 ESP_BLE_AD_TYPE_128SOL_SRV_UUID, &uuid_len);
-
-                            esp_log_buffer_char(GATTC_TAG, adv_name, adv_name_len);
-                        }
                         is_any_near = true;
                         esp_ble_gap_stop_scanning();
                         break;
@@ -186,29 +177,11 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         }
 
         case ESP_GAP_BLE_SCAN_STOP_COMPLETE_EVT:
-            if (param->scan_stop_cmpl.status != ESP_BT_STATUS_SUCCESS) {
-                ESP_LOGE(GATTC_TAG, "scan stop failed, error status = %x", param->scan_stop_cmpl.status);
-                break;
-            }
-            ESP_LOGI(GATTC_TAG, "stop scan successfully");
             break;
 
         case ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT:
-            if (param->adv_stop_cmpl.status != ESP_BT_STATUS_SUCCESS) {
-                ESP_LOGE(GATTC_TAG, "adv stop failed, error status = %x", param->adv_stop_cmpl.status);
-                break;
-            }
-            ESP_LOGI(GATTC_TAG, "stop adv successfully");
             break;
         case ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
-            ESP_LOGI(GATTC_TAG,
-                     "update connection params status = %d, min_int = %d, max_int = %d,conn_int = %d,latency = %d, timeout = %d",
-                     param->update_conn_params.status,
-                     param->update_conn_params.min_int,
-                     param->update_conn_params.max_int,
-                     param->update_conn_params.conn_int,
-                     param->update_conn_params.latency,
-                     param->update_conn_params.timeout);
             break;
         default:
             break;
@@ -222,9 +195,6 @@ static void esp_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp
         if (param->reg.status == ESP_GATT_OK) {
             gl_profile_tabc[param->reg.app_id].gattc_if = gattc_if;
         } else {
-            ESP_LOGI(GATTC_TAG, "reg app failed, app_id %04x, status %d",
-                     param->reg.app_id,
-                     param->reg.status);
             return;
         }
     }
@@ -271,49 +241,39 @@ void init_SCAN() {
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
     ret = esp_bt_controller_init(&bt_cfg);
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s initialize controller failed, error code = %x\n", __func__, ret);
         return;
     }
 
     ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s enable controller failed, error code = %x\n", __func__, ret);
         return;
     }
 
     ret = esp_bluedroid_init();
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s init bluetooth failed, error code = %x\n", __func__, ret);
         return;
     }
 
     ret = esp_bluedroid_enable();
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s enable bluetooth failed, error code = %x\n", __func__, ret);
         return;
     }
 
     //register the  callback function to the gap module
     ret = esp_ble_gap_register_callback(esp_gap_cb);
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s gap register failed, error code = %x\n", __func__, ret);
         return;
     }
 
     //register the callback function to the gattc module
     ret = esp_ble_gattc_register_callback(esp_gattc_cb);
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s gattc register failed, error code = %x\n", __func__, ret);
         return;
     }
 
     ret = esp_ble_gattc_app_register(PROFILE_A_APP_ID);
     if (ret) {
-        ESP_LOGE(GATTC_TAG, "%s gattc app register failed, error code = %x\n", __func__, ret);
     }
 
     esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
-    if (local_mtu_ret) {
-        ESP_LOGE(GATTC_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
-    }
 }
