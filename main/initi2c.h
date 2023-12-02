@@ -211,14 +211,11 @@ static esp_err_t _check_i2c_error(esp_err_t err)
 }
 
 /**
- * @brief Read a sequence of bytes from a MPU9250 sensor registers
+ * Verify if lcd is correctly initialized
+ * @param i2c_lcd1602_info Screen infos
+ * @return Bool
  */
-static esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
-{
-    return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-}
-
-static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info)
+static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info) // Je suis au courant de l'erreur de pointeur ici, je ne sais malheureusement pas comment le gérer efficacement
 {
     bool ok = false;
     if (i2c_lcd1602_info != NULL)
@@ -231,6 +228,14 @@ static bool _is_init(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     return ok;
 }
 
+/**
+ * Send bytes directly to LCD
+ *
+ * @param smbus_info Screen infos
+ * @param data Data to send
+ * @return Error
+ * @return Nothing
+ */
 esp_err_t smbus_send_byte(const smbus_info_t * smbus_info, uint8_t data)
 {
     // Protocol: [S | ADDR | Wr | As | DATA | As | P]
@@ -296,7 +301,7 @@ static esp_err_t _write_data(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_
 }
 
 
-
+// Send write char to controller
 esp_err_t i2c_lcd1602_write_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t chr)
 {
     esp_err_t err = ESP_FAIL;
@@ -307,6 +312,7 @@ esp_err_t i2c_lcd1602_write_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, ui
     return err;
 }
 
+// Send write to controller
 esp_err_t lcd_write(const i2c_lcd1602_info_t * i2c_lcd1602_info, const char * string)
 {
     esp_err_t err = ESP_FAIL;
@@ -321,6 +327,7 @@ esp_err_t lcd_write(const i2c_lcd1602_info_t * i2c_lcd1602_info, const char * st
     return err;
 }
 
+// Send command to return cursor to base 0 0 position
 esp_err_t lcd_home(const i2c_lcd1602_info_t * i2c_lcd1602_info)
 {
     esp_err_t err = ESP_FAIL;
@@ -335,6 +342,7 @@ esp_err_t lcd_home(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     return err;
 }
 
+// Send command to clear screen
 esp_err_t lcd_clear(const i2c_lcd1602_info_t * i2c_lcd1602_info)
 {
     esp_err_t err = ESP_FAIL;
@@ -349,6 +357,7 @@ esp_err_t lcd_clear(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     return err;
 }
 
+// Send command to reset screen
 esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
 {
     esp_err_t first_err = ESP_OK;
@@ -431,6 +440,7 @@ esp_err_t i2c_lcd1602_reset(const i2c_lcd1602_info_t * i2c_lcd1602_info)
     return first_err;
 }
 
+// Initialize LCD display
 esp_err_t i2c_lcd1602_init(i2c_lcd1602_info_t * i2c_lcd1602_info, smbus_info_t * smbus_info,
                            bool backlight, uint8_t num_rows, uint8_t num_columns, uint8_t num_visible_columns)
 {
@@ -463,6 +473,7 @@ esp_err_t i2c_lcd1602_init(i2c_lcd1602_info_t * i2c_lcd1602_info, smbus_info_t *
     return err;
 }
 
+// Send command to define custom characters
 esp_err_t lcd_define_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, i2c_lcd1602_custom_index_t index, const uint8_t pixelmap[])
 {
     esp_err_t err = ESP_FAIL;
@@ -478,6 +489,7 @@ esp_err_t lcd_define_char(const i2c_lcd1602_info_t * i2c_lcd1602_info, i2c_lcd16
     return err;
 }
 
+// Send command to move cursor to defined x y position
 esp_err_t lcd_move_cursor(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t col, uint8_t row)
 {
     esp_err_t err = ESP_FAIL;

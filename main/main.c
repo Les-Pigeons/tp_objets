@@ -25,7 +25,7 @@
 #define SKREEEEEEEE 25
 #define LIGHT 19
 #define SENSOR 14
-#define TAG "SELF_LOOP"
+#define SELFTAG "SELF_LOOP"
 #define CONFIG_SNTP_TIME_SERVER "time.windows.com"
 
 #ifndef INET6_ADDRSTRLEN
@@ -415,12 +415,12 @@ void hardware_cry(Game *game, GameData *gameData) {
 
 void hardware_low_energy(Game *game) {
     if (game->energy < 300 && !light_on) {
-        ESP_LOGW(TAG, "Light on");
+        ESP_LOGW(SELFTAG, "Light on");
         gpio_set_level(LIGHT, 1);
         light_on = true;
     }
     if (game->energy >= 300 && light_on) {
-        ESP_LOGW(TAG, "Light off");
+        ESP_LOGW(SELFTAG, "Light off");
         gpio_set_level(LIGHT, 0);
         light_on = false;
     }
@@ -646,7 +646,7 @@ void game_loop(Game *game) {
     int frame = 0;
 
     printf("Average: %d\n", get_framework_average(frameworkQuality));
-    ESP_LOGW(TAG, "Game loop entrance");
+    ESP_LOGW(SELFTAG, "Game loop entrance");
 
     while (true) {
         frame = (frame + 1) % 2;
@@ -688,12 +688,12 @@ void hardware_loop(Game *game) {
 
         if (gpio_get_level(SENSOR) == 1 && !sensor) {
             set_proximity(game, true);
-            ESP_LOGW(TAG, "Sensor UP");
+            ESP_LOGW(SELFTAG, "Sensor UP");
             sensor = true;
         }
         if (gpio_get_level(SENSOR) == 0 && sensor) {
             set_proximity(game, false);
-            ESP_LOGW(TAG, "Sensor DOWN");
+            ESP_LOGW(SELFTAG, "Sensor DOWN");
             sensor = false;
         }
 
@@ -715,10 +715,10 @@ void BLE_magic(Game *game) {
         ble_gestion();
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         if (is_any_near) {
-            ESP_LOGW(TAG, "Found someone close");
+            ESP_LOGW(SELFTAG, "Found someone close");
             set_social(game, 1);
         } else {
-            ESP_LOGW(TAG, "I'm alone :'( ");
+            ESP_LOGW(SELFTAG, "I'm alone :'( ");
             set_social(game, 0);
         }
 
@@ -808,7 +808,7 @@ void main_sntp() {
     localtime_r(&now, &timeinfo);
     // Is time set? If not, tm_year will be (1970 - 1900).
     if (timeinfo.tm_year < (2016 - 1900)) {
-        ESP_LOGI(TAG, "Time is not set yet. Connecting to WiFi and getting time over NTP.");
+        ESP_LOGI(SELFTAG, "Time is not set yet. Connecting to WiFi and getting time over NTP.");
         obtain_time();
         // update 'now' variable with current time
         time(&now);
@@ -818,7 +818,7 @@ void main_sntp() {
         // add 500 ms error to the current system time.
         // Only to demonstrate a work of adjusting method!
         {
-            ESP_LOGI(TAG, "Add a error for test adjtime");
+            ESP_LOGI(SELFTAG, "Add a error for test adjtime");
             struct timeval tv_now;
             gettimeofday(&tv_now, NULL);
             int64_t cpu_time = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
@@ -827,7 +827,7 @@ void main_sntp() {
             settimeofday(&tv_error, NULL);
         }
 
-        ESP_LOGI(TAG, "Time was set, now just adjusting it. Use SMOOTH SYNC method.");
+        ESP_LOGI(SELFTAG, "Time was set, now just adjusting it. Use SMOOTH SYNC method.");
         obtain_time();
         // update 'now' variable with current time
         time(&now);
@@ -845,7 +845,7 @@ void main_sntp() {
         struct timeval outdelta;
         while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS) {
             adjtime(NULL, &outdelta);
-            ESP_LOGI(TAG, "Waiting for adjusting time ... outdelta = %jd sec: %li ms: %li us",
+            ESP_LOGI(SELFTAG, "Waiting for adjusting time ... outdelta = %jd sec: %li ms: %li us",
                      (intmax_t) outdelta.tv_sec,
                      outdelta.tv_usec / 1000,
                      outdelta.tv_usec % 1000);
@@ -856,17 +856,17 @@ void main_sntp() {
 }
 
 static void print_servers(void) {
-    ESP_LOGI(TAG, "List of configured NTP servers:");
+    ESP_LOGI(SELFTAG, "List of configured NTP servers:");
 
     for (uint8_t i = 0; i < SNTP_MAX_SERVERS; ++i) {
         if (esp_sntp_getservername(i)) {
-            ESP_LOGI(TAG, "server %d: %s", i, esp_sntp_getservername(i));
+            ESP_LOGI(SELFTAG, "server %d: %s", i, esp_sntp_getservername(i));
         } else {
             // we have either IPv4 or IPv6 address, let's print it
             char buff[INET6_ADDRSTRLEN];
             ip_addr_t const *ip = esp_sntp_getserver(i);
             if (ipaddr_ntoa_r(ip, buff, INET6_ADDRSTRLEN) != NULL)
-                ESP_LOGI(TAG, "server %d: %s", i, buff);
+                ESP_LOGI(SELFTAG, "server %d: %s", i, buff);
         }
     }
 }
@@ -883,7 +883,7 @@ static void obtain_time(void) {
      * NOTE: This call should be made BEFORE esp acquires IP address from DHCP,
      * otherwise NTP option would be rejected by default.
      */
-    ESP_LOGI(TAG, "Initializing SNTP");
+    ESP_LOGI(SELFTAG, "Initializing SNTP");
     esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(CONFIG_SNTP_TIME_SERVER);
     config.start = false;                       // start SNTP service explicitly (after connecting)
     config.server_from_dhcp = true;             // accept NTP offers from DHCP server, if any (need to enable *before* connecting)
@@ -901,7 +901,7 @@ static void obtain_time(void) {
      */
 
 #if LWIP_DHCP_GET_NTP_SRV
-    ESP_LOGI(TAG, "Starting SNTP");
+    ESP_LOGI(SELFTAG, "Starting SNTP");
     esp_netif_sntp_start();
 #if LWIP_IPV6 && SNTP_MAX_SERVERS > 2
     /* This demonstrates using IPv6 address as an additional SNTP server
@@ -914,7 +914,7 @@ static void obtain_time(void) {
 #endif  /* LWIP_IPV6 */
 
 #else
-    ESP_LOGI(TAG, "Initializing and starting SNTP");
+    ESP_LOGI(SELFTAG, "Initializing and starting SNTP");
 #if CONFIG_LWIP_SNTP_MAX_SERVERS > 1
     /* This demonstrates configuring more than one server
      */
@@ -942,7 +942,7 @@ static void obtain_time(void) {
     int retry = 0;
     const int retry_count = 15;
     while (esp_netif_sntp_sync_wait(2000 / portTICK_PERIOD_MS) == ESP_ERR_TIMEOUT && ++retry < retry_count) {
-        ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+        ESP_LOGI(SELFTAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
     }
     time(&now);
     localtime_r(&now, &timeinfo);
