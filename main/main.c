@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include "initi2c.h"
+#include "I2C.h"
 #include "BLE.h"
 #include "esp_system.h" //esp_init funtions esp_err_t
 #include "esp_wifi.h" //esp_wifi_init functions and wifi operations
@@ -32,11 +32,8 @@
 #define INET6_ADDRSTRLEN 48
 #endif
 
-
 #define EXAMPLE_ESP_WIFI_SSID      "cstjean"
 #define EXAMPLE_ESP_WIFI_PASS      "humanisme2023"
-
-i2c_lcd1602_info_t *global_info;
 
 const int BASE_FRAMEWORK_PROGRESS = 10;
 const int BASE_ENERGY_INCREASE = 3;
@@ -112,6 +109,10 @@ typedef struct GameData {
     int lastCrying; // Last time crying was executed
 } GameData;
 
+/**
+ * Set game base datas
+ * @return new game
+ */
 Game initializeGame() {
     Game newGame;
 
@@ -149,6 +150,10 @@ Game initializeGame() {
     return newGame;
 }
 
+/**
+ * Init the queue
+ * @param queue queue
+ */
 void initQueue(Queue *queue) {
     queue->last = -1;
 
@@ -157,33 +162,13 @@ void initQueue(Queue *queue) {
     }
 }
 
-void initializeLCD() {
-    int i2c_master_port = 0;
-    i2c_config_t conf = {
-            .mode = 1,
-            .sda_io_num = I2C_MASTER_SDA_IO,         // select GPIO specific to your project
-            .sda_pullup_en = GPIO_PULLUP_ENABLE,
-            .scl_io_num = I2C_MASTER_SCL_IO,         // select GPIO specific to your project
-            .scl_pullup_en = GPIO_PULLUP_ENABLE,
-            .master.clk_speed = I2C_MASTER_FREQ_HZ,  // select frequency specific to your project
-            // .clk_flags = 0,          /*!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here. */
-    };
 
-    i2c_lcd1602_info = i2c_lcd1602_malloc();
-    global_info = i2c_lcd1602_info;
-
-    smbus_info_t *smbus_info = malloc(sizeof(smbus_info_t));
-    smbus_init(smbus_info, 0, MPU9250_SENSOR_ADDR);
-
-    i2c_param_config(I2C_MASTER_NUM, &conf);
-    i2c_driver_install(smbus_info->i2c_port, 1, 0, 0, ESP_INTR_FLAG_SHARED);
-    i2c_master_start(i2c_cmd_link_create());
-
-    uint8_t data[2];
-    i2c_lcd1602_init(i2c_lcd1602_info, smbus_info, true, 2, 16, 16);
-}
-
-// Circular queue to get an average of the last 20 framework levels
+/**
+ * Circular queue to get an average of the last 20 framework levels
+ * @param queue queue
+ * @param value values
+ * @return validation
+ */
 int enqueue(Queue *queue, int value) {
     queue->last = (queue->last + 1) % MAX_QUEUE_SIZE;
     queue->array[queue->last] = value;
@@ -191,22 +176,24 @@ int enqueue(Queue *queue, int value) {
     return 1;
 }
 
-void img_home() {
-    lcd_move_cursor(global_info, 0, 0);
-}
-
-void img_line() {
-    lcd_move_cursor(global_info, 0, 1);
-}
-
+/**
+ * Set cursor position to home
+ */
 void txt_home() {
-    lcd_move_cursor(global_info, 0, 0);
+    lcd_move_cursor(i2c_lcd1602_info, 0, 0);
 }
 
+/**
+ * Set cursor position to new line
+ */
 void txt_line() {
-    lcd_move_cursor(global_info, 0, 1);
+    lcd_move_cursor(i2c_lcd1602_info, 0, 1);
 }
 
+
+/**
+ * Set up GPIO
+ */
 void setupIO() {
     gpio_set_direction(NEXT, GPIO_MODE_INPUT);
     gpio_set_direction(ENERGY, GPIO_MODE_INPUT);
@@ -215,6 +202,10 @@ void setupIO() {
     gpio_set_direction(SENSOR, GPIO_MODE_INPUT);
 }
 
+/**
+ * Set custom char depending on gotchi state
+ * @param state Gotchi state
+ */
 void set_state_custom_char(int state) {
 
     switch (state) {
@@ -246,7 +237,10 @@ void set_state_custom_char(int state) {
     }
 }
 
-// TODO: Add proper values
+/**
+ * Get and set gotchi character depending on its state
+ * @param game game data
+ */
 void get_avatar_state(Game *game) {
     if (game->energy < 50) {
         game->avatarState = EPUISE;
@@ -263,7 +257,11 @@ void get_avatar_state(Game *game) {
     set_state_custom_char(game->avatarState);
 }
 
-// Get the average of the last 20 framework levels
+/**
+ * Get the average of the last 20 framework levels
+ * @param queue queue
+ * @return framework average
+ */
 int get_framework_average(Queue *queue) {
     int sum = 0;
     for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
@@ -273,6 +271,11 @@ int get_framework_average(Queue *queue) {
     return sum / MAX_QUEUE_SIZE;
 }
 
+/**
+ * Change proximity status
+ * @param game game data
+ * @param isProximityActive boolean for proximity
+ */
 void set_proximity(Game *game, bool isProximityActive) {
     game->isProximityActive = isProximityActive;
 
@@ -289,7 +292,10 @@ void set_proximity(Game *game, bool isProximityActive) {
 }
 
 
-// Manage energy increase and decrease
+/**
+ * Manage energy increase and decrease
+ * @param game game data
+ */
 void progress_energy(Game *game) {
     if (game->energyIncrease > 0) {
 
@@ -318,6 +324,10 @@ void progress_energy(Game *game) {
     }
 }
 
+/**
+ * Increase gotchi energy
+ * @param game game data
+ */
 void drink_energy(Game *game) {
     time_t currentTime;
     time(&currentTime);
@@ -332,9 +342,10 @@ void drink_energy(Game *game) {
     }
 }
 
-
-/* TODO - Romain: Add wifi to sync time. It might only be needed for the initialisation of the device. If it's the case
-    put it in main before any initialization */
+/**
+ * Self explanatory
+ * @return  time in string
+ */
 char *get_current_time() {
     time_t currentTime;
     time(&currentTime);
@@ -347,7 +358,10 @@ char *get_current_time() {
     return timeString;
 }
 
-
+/**
+ * Set crying status
+ * @param game game data
+ */
 void set_is_crying(Game *game) {
 
     if (game->socialMultiplier > 0.5) {
@@ -357,7 +371,10 @@ void set_is_crying(Game *game) {
     }
 }
 
-// TODO: Add proper values
+/**
+ * Set framework quality multiplier for social
+ * @param game
+ */
 void set_social_multiplier(Game *game) {
     time_t currentTime;
     time(&currentTime);
@@ -381,7 +398,11 @@ void set_social_multiplier(Game *game) {
     set_is_crying(game);
 }
 
-
+/**
+ * Change Social status
+ * @param game game data
+ * @param quantity number of friends near
+ */
 void set_social(Game *game, int quantity) {
     if (quantity <= 0) {
         return;
@@ -396,7 +417,11 @@ void set_social(Game *game, int quantity) {
     set_social_multiplier(game);
 }
 
-// Is used when the avatar feel alone and is crying
+/**
+ * Is used when the avatar feel alone and is crying
+ * @param game game data
+ * @param gameData Some other game data
+ */
 void hardware_cry(Game *game, GameData *gameData) {
     if (game->isCrying) {
         time_t currentTime;
@@ -413,6 +438,10 @@ void hardware_cry(Game *game, GameData *gameData) {
     }
 }
 
+/**
+ * Light LED when gotchi is tired
+ * @param game game data
+ */
 void hardware_low_energy(Game *game) {
     if (game->energy < 300 && !light_on) {
         ESP_LOGW(SELFTAG, "Light on");
@@ -426,11 +455,20 @@ void hardware_low_energy(Game *game) {
     }
 }
 
-
+/**
+ * Calculate exp required for next level
+ * @param level current leven
+ * @return Exp required
+ */
 int get_next_level_experience(int level) {
     return 100 * pow(level, 1.5);
 }
 
+/**
+ * Give experience to the gotchi
+ * @param game game data
+ * @param quality
+ */
 void add_experience(Game *game, int quality) {
     game->experience += quality * EXPERIENCE_QUALITY_MULTIPLIER * game->stateExperienceMultiplier;
 
@@ -440,7 +478,11 @@ void add_experience(Game *game, int quality) {
     }
 }
 
-
+/**
+ * Add a new complete framework
+ * @param game game data
+ * @param frameworkQuality current framework quality
+ */
 void add_framework(Game *game, Queue *frameworkQuality) {
     game->framework++;
     game->activeFrameworkProgress = 0;
@@ -457,6 +499,11 @@ void add_framework(Game *game, Queue *frameworkQuality) {
     add_experience(game, quality);
 }
 
+/**
+ * Define progress for current framework
+ * @param game game data
+ * @param frameworkQuality current framework quality
+ */
 void progress_framework(Game *game, Queue *frameworkQuality) {
     double progress = BASE_FRAMEWORK_PROGRESS * game->frameworkSpeedMultiplier + game->level;
     game->activeFrameworkProgress += (int) progress;
@@ -466,7 +513,12 @@ void progress_framework(Game *game, Queue *frameworkQuality) {
     }
 }
 
-
+/**
+ * Display character for animation
+ * @param frame Current
+ * @param str1 first frame character
+ * @param str2 second frame character
+ */
 void hardware_display_animation_header(int frame, char *str1, char *str2) {
     lcd_move_cursor(i2c_lcd1602_info, 11, 0);
     if (frame == 1) {
@@ -476,6 +528,11 @@ void hardware_display_animation_header(int frame, char *str1, char *str2) {
     }
 }
 
+/**
+ * Display animation for special events
+ * @param frame Current frame playing
+ * @param game game data
+ */
 void hardware_display_animation(int frame, Game *game) {
     lcd_move_cursor(i2c_lcd1602_info, 12, 1);
     if (frame == 1) {
@@ -493,6 +550,10 @@ void hardware_display_animation(int frame, Game *game) {
     }
 }
 
+/**
+ * Display the progress bar for framework completion
+ * @param game game data
+ */
 void hardware_display_progress_bar(Game *game) {
     int progress = (int) round((double) game->activeFrameworkProgress / FRAMEWORK_CREATION_EXP * 10.0);
 
@@ -507,20 +568,26 @@ void hardware_display_progress_bar(Game *game) {
     }
 }
 
+/**
+ * get the average quality for frameworks
+ * @param queue current queue
+ */
 void hardware_display_avg_quality(Queue *queue) {
     int quality = get_framework_average(queue);
 
     char pointeurStr[2] = "";
     sprintf(pointeurStr, "%d", quality);
 
-
     lcd_move_cursor(i2c_lcd1602_info, 14, 0);
     lcd_write(i2c_lcd1602_info, pointeurStr);
-    lcd_move_cursor(global_info, 15, 0);
-    _write_data(global_info, I2C_LCD1602_INDEX_CUSTOM_5);
+    lcd_move_cursor(i2c_lcd1602_info, 15, 0);
+    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_5);
 }
 
-// Display experience and level
+/**
+ * Display tab 1
+ * @param game game data
+ */
 void hardware_display_tab_1(Game *game) {
     char formattedString[11];
 
@@ -533,8 +600,10 @@ void hardware_display_tab_1(Game *game) {
     lcd_write(i2c_lcd1602_info, formattedString);
 }
 
-// TODO - Romain Trouver une solution pour définir l'heure (wifi)
-// Display energy and time
+/**
+ * Display tab 2
+ * @param game game data
+ */
 void hardware_display_tab_2(Game *game) {
     char formattedString[11];
 
@@ -547,7 +616,10 @@ void hardware_display_tab_2(Game *game) {
     lcd_write(i2c_lcd1602_info, get_current_time());
 }
 
-// Display framework and progress
+/**
+ * Display tab 3
+ * @param game game data
+ */
 void hardware_display_tab_3(Game *game) {
     char formattedString[11];
 
@@ -560,10 +632,18 @@ void hardware_display_tab_3(Game *game) {
     hardware_display_progress_bar(game);
 }
 
+/**
+ * Change displayed tab
+ * @param game game data
+ */
 void next_tab(Game *game) {
     game->activeTab = (game->activeTab + 1) % 3;
 }
 
+/**
+ * Support the different options for game tabs
+ * @param game game data
+ */
 void hardware_display_tab(Game *game) {
     switch (game->activeTab) {
         case 0:
@@ -578,7 +658,10 @@ void hardware_display_tab(Game *game) {
     }
 }
 
-// TODO: Add proper values
+/**
+ * Set data for framework quality
+ * @param game game data
+ */
 void get_framework_multipliers(Game *game) {
     switch (game->avatarState) {
         case REPOSE:
@@ -609,44 +692,14 @@ void get_framework_multipliers(Game *game) {
     }
 }
 
-// DEBUG
-void print_queue(Queue *queue) {
-    printf("Queue: ");
-    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        printf("%d ", queue->array[i]);
-    }
-    printf("\n");
-
-    printf("Average: %d\n", get_framework_average(queue));
-}
-
-// DEBUG
-void print_game(Game *game) {
-    printf("int level %d\n", game->level);
-    printf("int experience %d\n", game->experience);
-    printf("double stateExperienceMultiplier %f\n", game->stateExperienceMultiplier);
-    printf("int framework %d\n", game->framework);
-    printf("double frameworkQualityMultiplier %f\n", game->frameworkQualityMultiplier);
-    printf("double frameworkSpeedMultiplier %f\n", game->frameworkSpeedMultiplier);
-    printf("int activeFrameworkProgress %d\n", game->activeFrameworkProgress);
-    printf("int lastFrameworkLevel %d\n", game->lastFrameworkLevel);
-    printf("int lastProximity %d\n", game->lastProximity);
-    printf("bool isProximityActive %d\n", game->isProximityActive);
-    printf("int energy %d\n", game->energy);
-    printf("int energyMultiplier %d\n", game->energyMultiplier);
-    printf("int energyIncrease %d\n", game->energyIncrease);
-    printf("int lastEnergyIncrease %d\n\n", game->lastEnergyIncrease);
-}
-
+/**
+ * Software loop, manage the whole game
+ * @param game game data
+ */
 void game_loop(Game *game) {
-
     Queue *frameworkQuality = malloc(sizeof(Queue));
     initQueue(frameworkQuality);
-
     int frame = 0;
-
-    printf("Average: %d\n", get_framework_average(frameworkQuality));
-    ESP_LOGW(SELFTAG, "Game loop entrance");
 
     while (true) {
         frame = (frame + 1) % 2;
@@ -663,18 +716,20 @@ void game_loop(Game *game) {
 
         hardware_low_energy(game);
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(800 / portTICK_PERIOD_MS);
     }
 }
 
+/**
+ * Deal with button & sensor interaction
+ * @param game game data
+ */
 void hardware_loop(Game *game) {
     GameData *gameData = malloc(sizeof(GameData));
     gameData->lastCrying = 0;
     bool buttonPressed = false;
-    struct tm timeinfo;
 
     while (true) {
-
         if (gpio_get_level(NEXT) == 1 && !buttonPressed) {
             ESP_LOGW("SELF_LOOP", "Switch screen");
             next_tab(game);
@@ -702,12 +757,15 @@ void hardware_loop(Game *game) {
         }
 
         hardware_cry(game, gameData);
-
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
-void BLE_magic(Game *game) {
+/**
+ * Loop to manage BLE Events
+ * @param game game data
+ */
+void BLE_loop(Game *game) {
     while (1) {
         BLE_switch();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -732,6 +790,13 @@ void BLE_magic(Game *game) {
 }
 
 
+/**
+ * Handle wifi callback events
+ * @param event_handler_arg ?
+ * @param event_base Pointer to subsystem exposing events
+ * @param event_id event id
+ * @param event_data event data
+ */
 static void
 wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
     if (event_id == WIFI_EVENT_STA_START) {
@@ -748,6 +813,9 @@ wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t
     }
 }
 
+/**
+ * Connect to WIFI
+ */
 void wifi_connection() {
     //                          s1.4
     // 2 - Wi-Fi Configuration Phase
@@ -776,39 +844,42 @@ void wifi_connection() {
     // 4- Wi-Fi Connect Phase
     esp_wifi_connect();
     printf("wifi_init_softap finished. SSID:%s  password:%s", ssid, pass);
-
-
 }
 
+/**
+ * Entry point
+ */
 void app_main(void) {
     setupIO();
     ble_gestion();
-    initializeLCD();
+    i2c_lcd1602_info = initializeLCD();
     wifi_connection();
 
-    lcd_define_char(global_info, 3, charProgressEmpty);
-    lcd_define_char(global_info, 4, charProgressFull);
-    lcd_define_char(global_info, 5, charFlag);
-    lcd_move_cursor(global_info, 15, 0);
-    _write_data(global_info, I2C_LCD1602_INDEX_CUSTOM_5);
+    lcd_define_char(i2c_lcd1602_info, 3, charProgressEmpty);
+    lcd_define_char(i2c_lcd1602_info, 4, charProgressFull);
+    lcd_define_char(i2c_lcd1602_info, 5, charFlag);
+    lcd_move_cursor(i2c_lcd1602_info, 15, 0);
+    _write_data(i2c_lcd1602_info, I2C_LCD1602_INDEX_CUSTOM_5);
 
     Game game = initializeGame();
 
     xTaskCreate(game_loop, "game_loop", 4096, (void *) &game, 1, NULL);
-    xTaskCreate(BLE_magic, "BLE_magic", 4096, (void *) &game, 1, NULL);
+    xTaskCreate(BLE_loop, "BLE_magic", 4096, (void *) &game, 1, NULL);
     hardware_loop(&game);
 
 }
 
+/**
+ * Main function to connect to SNTP Servers in order to get the current time
+ * https://github.com/espressif/esp-idf/blob/master/examples/protocols/sntp/README.md
+ */
 void main_sntp() {
-
     time_t now;
     struct tm timeinfo;
     time(&now);
     localtime_r(&now, &timeinfo);
     // Is time set? If not, tm_year will be (1970 - 1900).
     if (timeinfo.tm_year < (2016 - 1900)) {
-        ESP_LOGI(SELFTAG, "Time is not set yet. Connecting to WiFi and getting time over NTP.");
         obtain_time();
         // update 'now' variable with current time
         time(&now);
@@ -833,10 +904,7 @@ void main_sntp() {
         time(&now);
     }
 #endif
-
-    char strftime_buf[64];
-
-    // Set timezone to Eastern Standard Time and print local time
+    // Get time from New york std
     setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
     tzset();
     localtime_r(&now, &timeinfo);
@@ -845,30 +913,10 @@ void main_sntp() {
         struct timeval outdelta;
         while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS) {
             adjtime(NULL, &outdelta);
-            ESP_LOGI(SELFTAG, "Waiting for adjusting time ... outdelta = %jd sec: %li ms: %li us",
-                     (intmax_t) outdelta.tv_sec,
-                     outdelta.tv_usec / 1000,
-                     outdelta.tv_usec % 1000);
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
     }
 
-}
-
-static void print_servers(void) {
-    ESP_LOGI(SELFTAG, "List of configured NTP servers:");
-
-    for (uint8_t i = 0; i < SNTP_MAX_SERVERS; ++i) {
-        if (esp_sntp_getservername(i)) {
-            ESP_LOGI(SELFTAG, "server %d: %s", i, esp_sntp_getservername(i));
-        } else {
-            // we have either IPv4 or IPv6 address, let's print it
-            char buff[INET6_ADDRSTRLEN];
-            ip_addr_t const *ip = esp_sntp_getserver(i);
-            if (ipaddr_ntoa_r(ip, buff, INET6_ADDRSTRLEN) != NULL)
-                ESP_LOGI(SELFTAG, "server %d: %s", i, buff);
-        }
-    }
 }
 
 static void obtain_time(void) {
@@ -933,8 +981,6 @@ static void obtain_time(void) {
 
     esp_netif_sntp_init(&config);
 #endif
-
-    print_servers();
 
     // wait for time to be set
     time_t now = 0;

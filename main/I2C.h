@@ -508,3 +508,28 @@ esp_err_t lcd_move_cursor(const i2c_lcd1602_info_t * i2c_lcd1602_info, uint8_t c
     }
     return err;
 }
+
+// Initialize the LCD
+i2c_lcd1602_info_t *initializeLCD() {
+    i2c_config_t conf = {
+            .mode = 1,
+            .sda_io_num = I2C_MASTER_SDA_IO,         // select GPIO specific to your project
+            .sda_pullup_en = GPIO_PULLUP_ENABLE,
+            .scl_io_num = I2C_MASTER_SCL_IO,         // select GPIO specific to your project
+            .scl_pullup_en = GPIO_PULLUP_ENABLE,
+            .master.clk_speed = I2C_MASTER_FREQ_HZ,  // select frequency specific to your project
+    };
+
+    i2c_lcd1602_info_t *i2c_lcd1602_info = i2c_lcd1602_malloc();
+
+    smbus_info_t *smbus_info = malloc(sizeof(smbus_info_t));
+    smbus_init(smbus_info, 0, MPU9250_SENSOR_ADDR);
+
+    i2c_param_config(I2C_MASTER_NUM, &conf);
+    i2c_driver_install(smbus_info->i2c_port, 1, 0, 0, ESP_INTR_FLAG_SHARED);
+    i2c_master_start(i2c_cmd_link_create());
+
+    i2c_lcd1602_init(i2c_lcd1602_info, smbus_info, true, 2, 16, 16);
+
+    return i2c_lcd1602_info;
+}
