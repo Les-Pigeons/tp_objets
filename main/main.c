@@ -8,8 +8,7 @@
 #include <stdbool.h>
 
 #include "initi2c.h"
-#include "initBLE.h"
-#include "scanBLE.h"
+#include "BLE.h"
 #include "esp_system.h" //esp_init funtions esp_err_t
 #include "esp_wifi.h" //esp_wifi_init functions and wifi operations
 #include "esp_event.h" //for wifi event
@@ -48,17 +47,18 @@ const int FRAMEWORK_CREATION_EXP = 500;
 const int EXPERIENCE_QUALITY_MULTIPLIER = 10;
 const char *ssid = "cstjean";
 const char *pass = "humanisme2023";
-int retry_num=0;
+int retry_num = 0;
 
-const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = -18000;
-const int   daylightOffset_sec = 3600;
+const char *ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = -18000;
+const int daylightOffset_sec = 3600;
 
 static const i2c_lcd1602_info_t *i2c_lcd1602_info;
 static bool light_on = false;
 static bool sensor = false;
 
 static void obtain_time(void);
+
 void main_sntp();
 
 // Queue
@@ -708,12 +708,11 @@ void hardware_loop(Game *game) {
 }
 
 void BLE_magic(Game *game) {
-    esp_err_t ret;
     while (1) {
-        ble_kill();
+        BLE_switch();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-        init_SCAN();
+        ble_gestion();
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         if (is_any_near) {
             ESP_LOGW(TAG, "Found someone close");
@@ -723,36 +722,33 @@ void BLE_magic(Game *game) {
             set_social(game, 0);
         }
 
-        kill_scan();
+        BLE_switch();
         vTaskDelay(2000 / portTICK_PERIOD_MS);
 
-        ble_emit();
+        ble_gestion();
 
         vTaskDelay(60000 / portTICK_PERIOD_MS);
     }
 }
 
 
-static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id,void *event_data){
-    if(event_id == WIFI_EVENT_STA_START)
-    {
-    }
-    else if (event_id == WIFI_EVENT_STA_CONNECTED)
-    {
+static void
+wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+    if (event_id == WIFI_EVENT_STA_START) {
+    } else if (event_id == WIFI_EVENT_STA_CONNECTED) {
         printf("WiFi CONNECTED\n");
-    }
-    else if (event_id == WIFI_EVENT_STA_DISCONNECTED)
-    {
-        if(retry_num<5){esp_wifi_connect();retry_num++;printf("Retrying to Connect...\n");}
-    }
-    else if (event_id == IP_EVENT_STA_GOT_IP)
-    {
+    } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        if (retry_num < 5) {
+            esp_wifi_connect();
+            retry_num++;
+            printf("Retrying to Connect...\n");
+        }
+    } else if (event_id == IP_EVENT_STA_GOT_IP) {
         main_sntp();
     }
 }
 
-void wifi_connection()
-{
+void wifi_connection() {
     //                          s1.4
     // 2 - Wi-Fi Configuration Phase
     esp_netif_init();
@@ -770,8 +766,8 @@ void wifi_connection()
             }
 
     };
-    strcpy((char*)wifi_configuration.sta.ssid, ssid);
-    strcpy((char*)wifi_configuration.sta.password, pass);
+    strcpy((char *) wifi_configuration.sta.ssid, ssid);
+    strcpy((char *) wifi_configuration.sta.password, pass);
     //esp_log_write(ESP_LOG_INFO, "Kconfig", "SSID=%s, PASS=%s", ssid, pass);
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_configuration);
     // 3 - Wi-Fi Start Phase
@@ -779,14 +775,14 @@ void wifi_connection()
     esp_wifi_set_mode(WIFI_MODE_STA);
     // 4- Wi-Fi Connect Phase
     esp_wifi_connect();
-    printf( "wifi_init_softap finished. SSID:%s  password:%s",ssid,pass);
+    printf("wifi_init_softap finished. SSID:%s  password:%s", ssid, pass);
 
 
 }
 
 void app_main(void) {
     setupIO();
-    ble_emit();
+    ble_gestion();
     initializeLCD();
     wifi_connection();
 
@@ -804,8 +800,7 @@ void app_main(void) {
 
 }
 
-void main_sntp()
-{
+void main_sntp() {
 
     time_t now;
     struct tm timeinfo;
@@ -851,21 +846,20 @@ void main_sntp()
         while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS) {
             adjtime(NULL, &outdelta);
             ESP_LOGI(TAG, "Waiting for adjusting time ... outdelta = %jd sec: %li ms: %li us",
-                     (intmax_t)outdelta.tv_sec,
-                     outdelta.tv_usec/1000,
-                     outdelta.tv_usec%1000);
+                     (intmax_t) outdelta.tv_sec,
+                     outdelta.tv_usec / 1000,
+                     outdelta.tv_usec % 1000);
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
     }
 
 }
 
-static void print_servers(void)
-{
+static void print_servers(void) {
     ESP_LOGI(TAG, "List of configured NTP servers:");
 
-    for (uint8_t i = 0; i < SNTP_MAX_SERVERS; ++i){
-        if (esp_sntp_getservername(i)){
+    for (uint8_t i = 0; i < SNTP_MAX_SERVERS; ++i) {
+        if (esp_sntp_getservername(i)) {
             ESP_LOGI(TAG, "server %d: %s", i, esp_sntp_getservername(i));
         } else {
             // we have either IPv4 or IPv6 address, let's print it
@@ -877,8 +871,7 @@ static void print_servers(void)
     }
 }
 
-static void obtain_time(void)
-{
+static void obtain_time(void) {
 
 #if LWIP_DHCP_GET_NTP_SRV
     /**
@@ -945,7 +938,7 @@ static void obtain_time(void)
 
     // wait for time to be set
     time_t now = 0;
-    struct tm timeinfo = { 0 };
+    struct tm timeinfo = {0};
     int retry = 0;
     const int retry_count = 15;
     while (esp_netif_sntp_sync_wait(2000 / portTICK_PERIOD_MS) == ESP_ERR_TIMEOUT && ++retry < retry_count) {
