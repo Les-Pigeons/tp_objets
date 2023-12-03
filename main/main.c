@@ -246,9 +246,9 @@ void get_avatar_state(Game *game) {
         game->avatarState = EPUISE;
     } else if (game->energy < 300) {
         game->avatarState = FATIGUE;
-    } else if (game->energy > 900) {
+    } else if (game->energy > 950) {
         game->avatarState = HYPERACTIF;
-    } else if (game->lastProximity > 1000) {
+    } else if (game->lastProximity > 10*60*1000) {
         game->avatarState = SOLITAIRE;
     } else {
         game->avatarState = REPOSE;
