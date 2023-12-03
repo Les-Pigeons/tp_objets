@@ -42,3 +42,11 @@ Motivez le ! Faites le intéragir avec d'autres ! Donnez lui PLUS DE GURU, ENCOR
 
 
 ## ECRANS
+### Ecran 1
+![SCR1](assets/doc/SCR1.jpg)
+
+### Ecran 2
+![SCR2](assets/doc/SCR2.jpg)
+
+### Ecran 3
+![SCR3](assets/doc/SCR3.jpg)
