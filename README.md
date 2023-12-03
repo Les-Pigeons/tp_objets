@@ -1,35 +1,44 @@
 | Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-S2 | ESP32-S3 |
 | ----------------- | ----- | -------- | -------- | -------- | -------- | -------- | -------- |
 
-# _Sample project_
+# _JSGOTCHI_
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+---
 
-This is the simplest buildable example. The example is used by command `idf.py create-project`
-that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
+Bienvenue dans le futur du FUN !
+
+Ce jeu, basé sur le concept du Tamagotchi, vous rend maître d'un jeune diplômé en informatique dans sa quête de créer de super frameworks !
+
+Motivez le ! Faites le intéragir avec d'autres ! Donnez lui PLUS DE GURU, ENCORE PLUUUUUUUUUUUUS DE GURU !
+
+## Plan de fonctionnement
+![photo](assets/doc/photo.jpg)
+![schema](assets/doc/schema.png)
+
+## GPIO 
+| GPIO | MODE   | CIBLE              | OBJECTIF                                                                 | 
+|------|--------|--------------------|--------------------------------------------------------------------------|
+| 19   | OUTPUT | LED                | Eclairage de la led de fatigue du Gotchi                                 |
+| 21   | SDA    | LCD                | Gestion SDA de l'écran                                                   |
+| 22   | SCL    | LCD                | Gestion SCL de l'écran                                                   |
+| 14   | INPUT  | Capteur infrarouge | Detection de présence infrarouge pour la solitude de proximité du Gotchi |
+| 25   | OUTPUT | Buzzer             | Buzzer qui se déclenche lors de la solitude BLE                          |
+| 32   | INPUT  | BUTTON             | Donner de l'energie au Gotchi                                            |
+| 35   | INPUT  | BUTTON             | Changer l'écran actif                                                    |
+
+## ELEMENTS
+
+| ELEMENT                  | UTILISATION             | REPRESENTATION                                                  | IMPLEMENTATION                                                                                                                                                                               |
+|--------------------------|-------------------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| LCD                      | Affichage               | ![LCDR](assets/doc/LCDR.jpg)<br/> ![LCDS](assets/doc/LCDSc.jpg) | Coeur même du jeu, le LCD est séparé en 3 écrans distinct, chacun affichant des caractéristiques.<br/>Voir plus sur les section dans la [section dédiée](#ECRANS)                            |
+| LED                      | Notification visuelle   | ![LEDR](assets/doc/LEDR.jpg) ![LEDS](assets/doc/LEDS.jpg)       | La LED servira a notifier le joueur lors d'un niveau d'energie trop faible.<br/> Elle s'éteindra lorsque celui ci remontera                                                                  |
+| Capteur<br/>de proximité | Interaction humaine     | ![CAPR](assets/doc/CAPR.jpg) ![CAPS](assets/doc/CAPS.jpg)       | Le capteur de proximité infrarouge viendra exciter le gotchi, qui verra sa productivité augmentée.                                                                                           |
+| Bouton 1 : Energie       | Interaction utilisateur | ![ENGR](assets/doc/ENGR.jpg) ![ENGS](assets/doc/ENGS.jpg)       | Ce bouton permet de fournir de l'energie au Gotchi, afin d'augmenter sa productivité. **Mais attention** ! Trop lui en donner réduira considérablement la qualité des Frameworks dévellopés. |
+| Bouton 2 : Ecrans        | Interaction utilisateur | ![SCRR](assets/doc/SCRR.jpg) ![SCRS](assets/doc/SCRS.jpg)       | Ce bouton permet de changer l'écran actif. Voir la  [section dédiée](#ECRANS)                                                                                                                |
+| Sirène                   | Notification sonore     | ![BUZZR](assets/doc/BUZZR.jpg) ![BUZZS](assets/doc/BUZZS.jpg)   | Le buzzer sonnera quand le gotch se sentira seul                                                                                                                                             |
+| BLE                      | Interaction Gotchienne  |                                                                 | Le BLE permet la communication entre les gotchis a proximité, afin de faire qu'il se sente moins seul, et ainsi augmente la vitesse et la qualité de production de nouveaux frameworks.      |
+| Wifi                     | Heure                   |                                                                 | Le wifi permet d'aller récupérer l'heure réelle du réseau wifi dans lequel il a été configuré.                                                                                               |
 
 
 
-## How to use example
-We encourage the users to use the example as a template for the new projects.
-A recommended way is to follow the instructions on a [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project).
-
-## Example folder contents
-
-The project **sample_project** contains one source file in C language [main.c](main/main.c). The file is located in folder [main](main).
-
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt`
-files that provide set of directives and instructions describing the project's source files and targets
-(executable, library, or both). 
-
-Below is short explanation of remaining files in the project folder.
-
-```
-├── CMakeLists.txt
-├── main
-│   ├── CMakeLists.txt
-│   └── main.c
-└── README.md                  This is the file you are currently reading
-```
-Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
-They are not used or needed when building with CMake and idf.py.
+## ECRANS
