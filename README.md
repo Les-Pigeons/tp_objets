@@ -50,3 +50,16 @@ Motivez le ! Faites le intéragir avec d'autres ! Donnez lui PLUS DE GURU, ENCOR
 
 ### Ecran 3
 ![SCR3](assets/doc/SCR3.jpg)
+
+## ETATS DE L'AVATAR
+L'avatar possède plusieurs états affectant sa productivité:
+
+
+| ETAT       | REPRESENTATION                                                                                                                | EFFET                                                                                                   | 
+|------------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| Reposé     | <img src="assets/doc/IDLHPY.png" alt="idlhpy" width=50 height=50> <img src="assets/doc/IDL.png" alt="hpy" width=50 height=50> | L'avatar se sent bien, sa productivité et la qualité sont elevées                                       |
+| Fatigué    | <img src="assets/doc/TRD1.png" alt="trd" width=50 height=50> <img src="assets/doc/TRD2.png" alt="trd2" width=50 height=50>    | L'avatar somnole, sa productivté est en baisse                                                          |
+| Epuisé     | <img src="assets/doc/SLP1.png" alt="slp1" width=50 height=50> <img src="assets/doc/SLP2.png" alt="slp2" width=50 height=50>   | L'avatar dors, sa productivité est au minimum                                                           |
+| Hyperactif | <img src="assets/doc/IDLHPY.png" alt="idlhpy" width=50 height=50> <img src="assets/doc/HPY.png" alt="hpy" width=50 height=50> | L'avatar à bu trop de GURU, sa productivité est maximale, mais la qualité des frameworks est affaiblie. |
+| Excité     | <img src="assets/doc/STL1.png" alt="stl" width=50 height=50> <img src="assets/doc/STL2.png" alt="stl2" width=50 height=50>    | L'avatar est surpris en train de flâner, la qualité du code augment.                                    |
+| Solitaire  | Pas de représentation visuelle, mais le buzzer se met a sonner                                                                | La qualité et la vitesse de developpement des frameworks est grandement diminuée                        |
